@@ -27,14 +27,28 @@ class KPIValue(models.Model):
 class TrainingModule(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
+    # other boolean to identify modules other than required by FDA
+    other = models.BooleanField(default=False)
     # expiration time in months
     retrain_months = models.IntegerField(null=True, blank=True)
-    # schedule date for the TrainingModule
-    scheduled_date = models.DateTimeField(null=True, blank=True)
+    
 
 
     def __str__(self):
         return f"{self.name}"
+
+    # when a module is created, update the RoleTrainingModules row and Profile trainings
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        for role in Role.objects.all():
+            role_training_modules = RoleTrainingModules.objects.get(role=role)
+            role_training_modules.update_row()
+        print('RoleTrainingModules updated')
+
+        for profile in Profile.objects.all():
+            profile_training_events = ProfileTrainingEvents.objects.get(profile=profile)
+            profile_training_events.update_row()
+        print('ProfileTrainingEvents updated')
     
     # profiles with this cert 
     def get_incomplete_training_modules_profiles(self):
