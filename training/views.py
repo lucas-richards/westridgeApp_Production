@@ -6,6 +6,7 @@ from users.models import Profile, Role
 from .forms import (
     TrainingEventUpdateForm,
     UploadFileForm,
+    UploadFileForm2,
     TrainingModuleUpdateForm,
     NewTrainingEvent
 )
@@ -23,6 +24,9 @@ from openpyxl.utils import get_column_letter
 from django.http import HttpResponse
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, Color
 from django.shortcuts import get_object_or_404
+import os
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
 
 
 
@@ -228,7 +232,8 @@ def new_entry(request):
         'training_modules': training_modules,
         'form': form,
         'sidepanel': sidepanel,
-        'upload_form': UploadFileForm()
+        'upload_form': UploadFileForm(),
+        'upload_form2': UploadFileForm2()
     }
 
     return render(request, 'training/new_entry.html', context)
@@ -942,6 +947,54 @@ def upload_file(request):
     else:
         form = UploadFileForm()
     return render(request, 'upload_file.html', {'form': form})
+
+@login_required
+def upload_file2(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        form2 =UploadFileForm2(request.POST, request.FILES)
+        if form2.is_valid():
+            # Get the date from the POST data
+            date = request.POST['date']
+            # transform date in MM-DD-YY format
+            date = dt.datetime.strptime(date, '%Y-%m-%d').strftime('%m-%d-%y')
+            
+            # Create a folder with the date under media/training_files/
+            folder = 'training_files'
+            fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, folder))
+
+            # Get the uploaded file
+            file = request.FILES['file']
+            # Create a new file name using the date
+            file_extension = os.path.splitext(file.name)[1]  # Extract the file extension
+            new_file_name = f"{date}{file_extension}"  # Combine date with the file extension
+
+            # Save the file in the specified folder with the new name
+            file_name = fs.save(new_file_name, file)
+            file_path = fs.path(file_name)
+            print('File path:', file_path)
+            messages.success(request, f'File has been uploaded successfully!')
+            return redirect('training-history')
+
+        else:
+            messages.error(request, 'Form is not valid. Please check your input.')
+    else:
+        form = UploadFileForm()
+        form2 = UploadFileForm2()
+    return redirect('training-history')
+
+def file_not_found(request, file_name):
+    file_path = os.path.join(settings.MEDIA_ROOT, 'training_files', file_name)
+    print('File path:', file_path)
+
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as file:
+            response = HttpResponse(file.read(), content_type='application/octet-stream')
+            response['Content-Disposition'] = f'inline; filename={file_name}'
+            return response
+    else:
+        messages.error(request, 'File not found!')
+        return redirect('training-grid')
 
 # API routes
 
