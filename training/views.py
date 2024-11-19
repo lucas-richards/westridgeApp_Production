@@ -100,33 +100,33 @@ def supervisors(request):
             messages.success(request, f'Supervisor has been updated for {len(profiles)} profiles!')
     
     for sup in supervisors:
-        
         print('Get supervisor:', sup.username)
         row = {
             'username': sup.first_name + ' ' + sup.last_name,
-            'percentage':'',
+            'percentage': '',
             'total_modules': '',
-            'modules':''
+            'modules': ''
         }
         modules = {
             'completed': [],
             'expired': [],
-            'missing': []
+            'missing': [],
+            'toexpire': []  # Add the 'toexpire' category
         }
-        
+
         profiles = sup.supervisor_profiles.all()
-        # filter only active profiles
+        # Filter only active profiles
         profiles = [profile for profile in profiles if profile.active]
         print('Profiles:', profiles)
         profile_training_events = ProfileTrainingEvents.objects.filter(profile__in=profiles).values_list('row', flat=True)
-        
+
         for i, training_module in enumerate(training_modules):
             print('Training module:', training_module)
             for profile_training_event in profile_training_events:
                 print('Profile training event:', profile_training_event)
                 print('iii', i)
                 profile_training_event = profile_training_event.split(',')[i]
-                
+
                 if profile_training_event == '-':
                     continue
                 elif profile_training_event[0] == 'T':
@@ -137,27 +137,34 @@ def supervisors(request):
                         current_date = dt.datetime.now()
                         delta = current_date - parsed_date
                         months_difference = delta.days // 30  # Approximate calculation for months
-                        
+
                         if training_module.retrain_months:
+                            # Check if the module has expired
                             if months_difference > training_module.retrain_months:
                                 modules['expired'].append(training_module)
+                            # Check if the module will expire in the next 3 months
+                            elif training_module.retrain_months - months_difference <= 3:
+                                modules['toexpire'].append(training_module)
                             else:
                                 modules['completed'].append(training_module)
                     except ValueError:
                         continue
-        
-        modules['completed'] = list(set(modules['completed']) - set(modules['expired']) - set(modules['missing']))
+
+        # Remove overlaps and ensure unique modules in each category
+        modules['completed'] = list(set(modules['completed']) - set(modules['expired']) - set(modules['missing']) - set(modules['toexpire']))
         modules['expired'] = list(set(modules['expired']))
         modules['missing'] = list(set(modules['missing']))
-        
-        # percentage of completed modules over total
-        row['total_modules'] = len(modules['completed']) + len(modules['expired']) + len(modules['missing'])
+        modules['toexpire'] = list(set(modules['toexpire']))
+
+        # Calculate the percentage of completed modules over total
+        row['total_modules'] = len(modules['completed']) + len(modules['expired']) + len(modules['missing']) + len(modules['toexpire'])
         if row['total_modules'] == 0:
             row['total_modules'] = 1
         row['percentage'] = round(len(modules['completed']) / row['total_modules'] * 100)
-        
+
         row['modules'] = modules
         data.append(row)
+
     # sort them by percentage
     data = sorted(data, key=lambda x: x['percentage'], reverse=True)
     

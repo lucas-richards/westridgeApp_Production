@@ -70,29 +70,36 @@
                 <div class="mb-3 card">
                     <div class="card-header" id="headingOne">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3>{{ row.username }}<span style="font-size: x-small;"></span></h3>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span style="font-size: 1.2em;min-width: 150px;">{{ row.username }}</span>
+                                <div>
+                                    {% for module in row.modules.completed %}
+                                        <span class="badge badge-success badge-pill" style="font-size: 0.8em;">
+                                            {{ module }}
+                                        </span>
+                                    {% endfor %}
+                                    {% for module in row.modules.toexpire %}
+                                        <span class="badge badge-warning badge-pill" style="font-size: 0.8em;">
+                                            {{ module }}
+                                        </span>
+                                    {% endfor %}
+                                    {% for module in row.modules.missing %}
+                                        <span class="badge badge-secondary badge-pill" style="font-size: 0.8em;">
+                                            {{ module }}
+                                        </span>
+                                    {% endfor %}
+                                    {% for module in row.modules.expired %}
+                                        <span class="badge badge-danger badge-pill" style="font-size: 0.8em;">
+                                            {{ module }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
                             </div>
-                            <div style="font-weight: bold;" class="p-1 border rounded">
+                            <div style="font-weight: bold;width:60px;text-align:center;" class="p-1 border rounded">
                                 {{ row.percentage }}%
                             </div>
 
                         </div>
-                        {% for module in row.modules.completed %}
-                            <span class="badge badge-success badge-pill">
-                                {{ module }}
-                            </span>
-                        {% endfor %}
-                        {% for module in row.modules.missing %}
-                            <span class="badge badge-secondary badge-pill">
-                                {{ module }}
-                            </span>
-                        {% endfor %}
-                        {% for module in row.modules.expired %}
-                            <span class="badge badge-danger badge-pill">
-                                {{ module }}
-                            </span>
-                        {% endfor %}
                     </div>
                     
                 </div>
