@@ -81,6 +81,7 @@ def supervisors(request):
     training_modules = TrainingModule.objects.filter(other=False).order_by('name')
     users = User.objects.filter(profile__active=True).order_by('username')
     data = []
+
     if request.method == 'POST':
         current_supervisor_id = request.POST.get('current_supervisor')
         new_supervisor_id = request.POST.get('new_supervisor')
@@ -95,75 +96,61 @@ def supervisors(request):
                 profile.supervisor = new_supervisor
                 profile.save()
             messages.success(request, f'Supervisor has been updated for {len(profiles)} profiles!')
-    
+
     for sup in supervisors:
         row = {
-            'username': sup.first_name + ' ' + sup.last_name,
+            'username': f'{sup.first_name} {sup.last_name}',
             'percentage': '',
             'total_modules': '',
-            'modules': ''
-        }
-        modules = {
-            'completed': [],
-            'expired': [],
-            'missing': [],
-            'toexpire': []  # Add the 'toexpire' category
+            'modules': {
+                'completed': [],
+                'expired': [],
+                'missing': [],
+                'toexpire': []
+            }
         }
 
-        profiles = sup.supervisor_profiles.all()
-        # Filter only active profiles
-        profiles = [profile for profile in profiles if profile.active]
+        profiles = sup.supervisor_profiles.filter(active=True)
         profile_training_events = ProfileTrainingEvents.objects.filter(profile__in=profiles).values_list('row', flat=True)
 
         for i, training_module in enumerate(training_modules):
             for profile_training_event in profile_training_events:
-                profile_training_event = profile_training_event.split(',')[i]
-                
+                profile_training_event = profile_training_event.split(',')[i] if profile_training_event else ''
 
-                if profile_training_event == '-':
+                if not profile_training_event or profile_training_event == '-':
                     continue
-                elif profile_training_event[0] == 'T':
-                    modules['missing'].append(training_module)
+                elif profile_training_event.startswith('T'):
+                    row['modules']['missing'].append(training_module)
                 else:
                     try:
-                        parsed_date = dt.datetime.strptime(profile_training_event, '%m/%d/%y')  # Assuming the date format is MM/DD/YY
+                        parsed_date = dt.datetime.strptime(profile_training_event, '%m/%d/%y')
                         current_date = dt.datetime.now()
-                        delta = current_date - parsed_date
-                        months_difference = delta.days // 30  # Approximate calculation for months
+                        months_difference = (current_date - parsed_date).days // 30
 
                         if training_module.retrain_months:
-                            # Check if the module has expired
                             if months_difference > training_module.retrain_months:
-                                modules['expired'].append(training_module)
-                            # Check if the module will expire in the next 3 months
+                                row['modules']['expired'].append(training_module)
                             elif training_module.retrain_months - months_difference <= 3:
-                                modules['toexpire'].append(training_module)
+                                row['modules']['toexpire'].append(training_module)
                             else:
-                                modules['completed'].append(training_module)
+                                row['modules']['completed'].append(training_module)
+                        else:
+                            row['modules']['completed'].append(training_module)
                     except ValueError:
-                        print('Error parsing date:', profile_training_event, 'for', training_module, 'in', sup)
+                        print(f'Error parsing date: {profile_training_event} for {training_module} in {sup}')
                         continue
 
-        # Remove overlaps and ensure unique modules in each category
+        for key in row['modules']:
+            row['modules'][key] = list(set(row['modules'][key]))
 
-        modules['completed'] = list(set(modules['completed']) - set(modules['expired']) - set(modules['missing']) - set(modules['toexpire']))
-        modules['expired'] = list(set(modules['expired']))
-        modules['missing'] = list(set(modules['missing']))
-        modules['toexpire'] = list(set(modules['toexpire']))
+        row['total_modules'] = sum(len(row['modules'][key]) for key in row['modules'])
+        row['percentage'] = round(len(row['modules']['completed']) / row['total_modules'] * 100) if row['total_modules'] else 0
 
-        # Calculate the percentage of completed modules over total
-        row['total_modules'] = len(modules['completed']) + len(modules['expired']) + len(modules['missing']) + len(modules['toexpire'])
-        if row['total_modules'] == 0:
-            row['total_modules'] = 1
-        row['percentage'] = round(len(modules['completed']) / row['total_modules'] * 100)
-
-        row['modules'] = modules
         data.append(row)
 
-    # sort them by percentage
     data = sorted(data, key=lambda x: x['percentage'], reverse=True)
-    
-    return render(request, 'training/supervisors.html', {'title':'Supervisors','data': data, 'users': users, 'supervisors': supervisors})
+
+    return render(request, 'training/supervisors.html', {'title': 'Supervisors', 'data': data, 'users': users, 'supervisors': supervisors})
 
 @login_required
 # def staff_roles(request):

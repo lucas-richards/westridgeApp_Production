@@ -112,14 +112,14 @@ class Profile(models.Model):
     # # go over all the supervised profiles and add on a list those trainings that are missing or expired and those that are completed
     def get_supervised_training_modules(self):
 
-        supervised_profiles = self.user.supervisor_profiles.all()
+        supervised_profiles = self.user.supervisor_profiles.filter(active=True)
         modules = {
             'completed': [],
             'expired': [],
+            'toexpire': [],
             'missing': []
         }
         for profile in supervised_profiles:
-            print(f'Checking {profile.user.username}')
             must_have = profile.must_have_training_modules()
             # training_modules = profile.training_modules.all().order_by('name')  # Order training modules alphabetically
             if not must_have:
@@ -142,6 +142,8 @@ class Profile(models.Model):
                     modules['missing'].append(module)
                 elif status == 'Expired':
                     modules['expired'].append(module)
+                elif status == 'To Expire':
+                    modules['toexpire'].append(module)
                 else:
                     modules['completed'].append(module)
 
