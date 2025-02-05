@@ -39,12 +39,10 @@ def home(request):
     
     for training_module in must_have:
         event = TrainingEvent.objects.filter(profile=profile_instance, training_module=training_module).first()
-        print(training_module, event)
         row = {}
         row['training_module'] = training_module
         row['event'] = event
         data.append(row) 
-    print(data)
     percentage = profile_instance.get_training_modules_percentage()
    
     
@@ -86,7 +84,6 @@ def supervisors(request):
     if request.method == 'POST':
         current_supervisor_id = request.POST.get('current_supervisor')
         new_supervisor_id = request.POST.get('new_supervisor')
-        print('POST:', request.POST)
 
         if current_supervisor_id and new_supervisor_id:
             current_supervisor = get_object_or_404(User, pk=current_supervisor_id)
@@ -100,7 +97,6 @@ def supervisors(request):
             messages.success(request, f'Supervisor has been updated for {len(profiles)} profiles!')
     
     for sup in supervisors:
-        print('Get supervisor:', sup.username)
         row = {
             'username': sup.first_name + ' ' + sup.last_name,
             'percentage': '',
@@ -117,15 +113,12 @@ def supervisors(request):
         profiles = sup.supervisor_profiles.all()
         # Filter only active profiles
         profiles = [profile for profile in profiles if profile.active]
-        print('Profiles:', profiles)
         profile_training_events = ProfileTrainingEvents.objects.filter(profile__in=profiles).values_list('row', flat=True)
 
         for i, training_module in enumerate(training_modules):
-            print('Training module:', training_module)
             for profile_training_event in profile_training_events:
-                print('Profile training event:', profile_training_event)
-                print('iii', i)
                 profile_training_event = profile_training_event.split(',')[i]
+                
 
                 if profile_training_event == '-':
                     continue
@@ -148,9 +141,11 @@ def supervisors(request):
                             else:
                                 modules['completed'].append(training_module)
                     except ValueError:
+                        print('Error parsing date:', profile_training_event, 'for', training_module, 'in', sup)
                         continue
 
         # Remove overlaps and ensure unique modules in each category
+
         modules['completed'] = list(set(modules['completed']) - set(modules['expired']) - set(modules['missing']) - set(modules['toexpire']))
         modules['expired'] = list(set(modules['expired']))
         modules['missing'] = list(set(modules['missing']))
@@ -207,7 +202,6 @@ def new_entry(request):
     if request.method == 'POST':
         user_ids = request.POST.getlist('user1')
         module_ids = request.POST.getlist('training_module1')
-        print('POST:', request.POST)
         for user in user_ids:
             for module in module_ids:
                 # create a new training event
@@ -218,11 +212,9 @@ def new_entry(request):
                         completed_date=request.POST['completed_date']
                     )
                     training_event.save()
-                    print('Training event created:', training_event)
                     messages.success(request, f'Training event {training_event} has been added!')
                     
                 except:
-                    print('Error creating training event')
                     messages.error(request, 'Error creating training event')
         return redirect('training-history')
         
@@ -253,7 +245,6 @@ def new_user(request):
         # replace all spaces with underscores and make it lowercase
         username = username.replace(' ', '_').lower()
         password = username
-        print('username:', username, 'password:', password)
         form_r = UserRegisterForm(data={'username': username, 'password1': password, 'password2': password, 'first_name': request.POST['first_name'], 'last_name': request.POST['last_name'], 'email': request.POST['email']}) 
         form_p = ProfileUpdateForm(request.POST)
         if form_r.is_valid() and form_p.is_valid():
@@ -459,7 +450,6 @@ def dashboard(request):
         else:
             print('No training event for:', profile.user.username)
     
-    print('History:', history)
     history2 = {'x': ['1 year', '2 years', '3 years', '5 years'], 'y': [round(history['1year']/active_profiles.count()*100), round(history['2years']/active_profiles.count()*100), round(history['3years']/active_profiles.count()*100), round(history['5years']/active_profiles.count()*100)]}
     history1 = sorted(history.items(), key=lambda x: x[0])
     by_year = {}
@@ -473,18 +463,8 @@ def dashboard(request):
     # reverse by_year1
     by_year1 = by_year1[::-1]
     # prepare this data for a chart
-    print('By year1:', by_year1)
 
     by_year2 = {'x': [x[0] for x in by_year1], 'y': [x[1] for x in by_year1]}
-    
-    print('training_performed_users:', training_performed_values)
-    print('training_performed_dates:', training_performed_dates)
-    print('training_not_performed_values:', training_not_performed_values)
-    print('training_not_performed_dates:', training_not_performed_dates)
-    print('retraining_not_performed_values:', retraining_not_performed_values)
-    print('retraining_not_performed_dates:', retraining_not_performed_dates)
-    print('retraining_overdue_values:', retraining_overdue_values)
-    print('retraining_overdue_dates:', retraining_overdue_dates)
 
     context = {
         'title': 'Dashboard',
@@ -565,7 +545,6 @@ def training_profile(request, profile_id):
     profile = Profile.objects.get(pk=profile_id)
     training_events = TrainingEvent.objects.filter(profile=profile).order_by('-completed_date')
     training_modules = profile.must_have_training_modules()
-    print('Training modules:', training_modules)
     # zip training events with training modules
     data = []
     for training_module in training_modules:
@@ -609,12 +588,10 @@ def grid(request):
     # if the request has a supervisor parameter, filter the profiles by the supervisor
     selected_supervisor = request.GET.get('supervisor', '')
     other = request.GET.get('other', '')
-    print('request:', request.GET)
 
     if selected_supervisor:
         #  filter profile objects where supervisor = supervisor
         profiles = Profile.objects.filter(supervisor=selected_supervisor, active=True)
-        print('Profiles:', profiles)
     else:
         profiles = Profile.objects.filter(active=True)
 
@@ -624,7 +601,6 @@ def grid(request):
     else:    
         training_modules = TrainingModule.objects.all().order_by('name').filter(other=False)
         out_of_grid = TrainingModule.objects.all().count() - TrainingModule.objects.all().filter(other=False).count()
-        print('Out of grid:', out_of_grid)
 
     # Prepare data to be sent to the template
     data = []
@@ -699,7 +675,6 @@ def grid(request):
         headers = ["First name", "Last name"] + [tm.name for tm in training_modules]
         ws.append(headers)
 
-        print('Headers:', headers)
 
         # Apply styles to the header
         header_font = Font(bold=True)
@@ -915,7 +890,6 @@ def upload_file(request):
                 # Rest of your code here
                 employee_username = row['Employee'].replace(' ', '_').lower()  # Assuming 'Employee' is the column name in Excel
                 
-                print('Analyzing user:', employee_username)
                 # Iterate through each certificate and its completion date
                 for certificate in training_modules:
                     certificate_name = certificate[0:5]  # Get the first 5 characters of the certificate name
@@ -936,7 +910,6 @@ def upload_file(request):
                                     completed_date=completion_date
                                 )
 
-                                print(f'TrainingEvent object created for {profile} and {training_module}')
 
                         except User.DoesNotExist:
                             print(f"User does not exist for {employee_username}")
@@ -979,7 +952,6 @@ def upload_file2(request):
             # Save the file in the specified folder with the new name
             file_name = fs.save(new_file_name, file)
             file_path = fs.path(file_name)
-            print('File path:', file_path)
             messages.success(request, f'File has been uploaded successfully!')
             return redirect('training-history')
 
@@ -992,7 +964,6 @@ def upload_file2(request):
 
 def file_not_found(request, file_name):
     file_path = os.path.join(settings.MEDIA_ROOT, 'training_files', file_name)
-    print('File path:', file_path)
 
     if os.path.exists(file_path):
         with open(file_path, 'rb') as file:
@@ -1002,28 +973,4 @@ def file_not_found(request, file_name):
     else:
         messages.error(request, 'File not found!')
         return redirect('training-grid')
-
-# API routes
-
-# class TrainingModules(APIView): 
-#     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
-
-#     def get_queryset(self):
-#         return TrainingModule.objects.all().order_by('name')
-
-#     def get(self, request):
-#         training_modules = self.get_queryset()
-#         serializer = TrainingModuleSerializer(training_modules, many=True)
-#         return Response(serializer.data)
-
-# class TrainingEvents(APIView):
-#     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
-
-#     def get_queryset(self):
-#         return TrainingEvent.objects.all()
-
-#     def get(self, request):
-#         training_modules = self.get_queryset()
-#         serializer = TrainingEventSerializer(training_modules, many=True)
-#         return Response(serializer.data)
 
