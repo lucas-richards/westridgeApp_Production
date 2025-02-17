@@ -25,7 +25,7 @@ def main():
 def TrainingStatus(entity):
    
     # 2023.03.16 Version 100
-    #   Email Training Status to all supervisors including the team status
+    #   Email Training Status to all supervisors including the team status.
 
 
     # Setup logging
