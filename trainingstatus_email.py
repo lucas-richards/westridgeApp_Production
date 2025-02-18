@@ -143,6 +143,18 @@ def TrainingStatus(entity):
             print(f'email sent to {config.ADMIN_EMAIL}')
             logging.info(f'email sent to {supervisor.email} for {supervisor.username}')
             emails_sent.append(supervisor.username)
+            #  if supervisor gregg then send email to him and marcelle with greggs modules
+            #
+            if supervisor.username == 'gregg' or supervisor.username == 'john':
+                print('send email to gregg and marcelle')
+                Group47.send_email(
+                    to_address=config.ADMIN_EMAIL, 
+                    subject="Training Status", 
+                    body_text='This is the email content', 
+                    body_html=email_body,
+                    send=True
+                )
+                print(f'email sent to {config.ADMIN_EMAIL}')
         except Exception as e:
             print(f'Error sending email to {supervisor.email} for {supervisor.username}: {e}')
             logging.error(f'Error sending email to {supervisor.email} for {supervisor.username}')
