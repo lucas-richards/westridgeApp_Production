@@ -82,7 +82,7 @@ def TrainingStatus(entity):
             else:
                 print("No modules found")
 
-        # create a nice text to show all the people and their roles
+        # create a nice text to show all the people and their roles. 
         #
 
         # email the supervisor
@@ -147,6 +147,24 @@ def TrainingStatus(entity):
             #
             if supervisor.username == 'gregg' or supervisor.username == 'john':
                 print('send email to gregg and marcelle')
+                email_body = f"""
+                <html>
+                <body>
+                    <p>Dear {supervisor.first_name},</p>
+                    <p>This is your monthly automated training compliance update from IDTraining.</p>
+                    <p>Good job! All the people you supervise are up to date with their training modules.</p>
+                    <p><strong>Your team members and their roles:</strong><br>
+                    <p><strong>Quality-Related Modules:</strong><br>
+                    {required_modules_text}</p>
+                    <p><strong>Safety & HR-Related Modules:</strong><br>
+                    {recommended_modules_text}</p>
+                    <p>For more details, please visit <a href="{config.APP_URL}">IDTraining</a> app.</p>
+                    <p>Best regards,<br>
+                    IDTraining Team</p>
+                    <p><em>*** To stop receiving this monthly email, please contact the admin at {config.ADMIN_EMAIL}. ***</em></p>
+                </body>
+                </html>
+                """
                 Group47.send_email(
                     to_address=config.ADMIN_EMAIL, 
                     subject="Training Status", 
