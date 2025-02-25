@@ -5,6 +5,7 @@ import logging
 import os
 import django
 # Set up Django
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_projects.settings')
 django.setup()
 
@@ -12,8 +13,6 @@ sys.path.append('/home/bc/BigCommerceBackOrder')
  
 import Group47_100 as Group47
 import config_TrainingStatus as config
-
-
 from users.models import Profile
 from django.contrib.auth.models import User
 
@@ -47,7 +46,7 @@ def TrainingStatus(entity):
     #
     supervisors = User.objects.filter(supervisor_profiles__isnull=False, profile__active=True).distinct()
     print(f'Found {len(supervisors)} supervisors')
-    for supervisor in supervisors[3:4]:
+    for supervisor in supervisors:
         print(f'{supervisor.username} is a supervisor {supervisor.email}')
         modules = supervisor.profile.get_supervised_training_modules()
         # create a dictonary with people supervised and roles assigned
@@ -110,7 +109,7 @@ def TrainingStatus(entity):
                     <p>For more details, please visit <a href="{config.APP_URL}">IDTraining</a> app.</p>
                     <p>Best regards,<br>
                     IDTraining Team</p>
-                    <p><em>*** To stop receiving this monthly email, please contact the admin at {config.ADMIN_EMAIL}. ***</em></p>
+                    <p><em>*** (/home/bc/westridgeApp/trainingstatus_email.py) ***</em></p>
                 </body>
                 </html>
                 """
@@ -126,14 +125,13 @@ def TrainingStatus(entity):
                     <p>For more details, please visit <a href="{config.APP_URL}">IDTraining</a> app.</p>
                     <p>Best regards,<br>
                     IDTraining Team</p>
-                    <p><em>*** To stop receiving this monthly email, please contact the admin at {config.ADMIN_EMAIL}. ***</em></p>
+                    <p><em>*** (/home/bc/westridgeApp/trainingstatus_email.py) ***</em></p>
                 </body>
                 </html>
                 """
             
             Group47.send_email(
-                # to_address={supervisor.email}, 
-                to_address=config.ADMIN_EMAIL,
+                to_address={supervisor.email}, 
                 subject="Training Status", 
                 body_text='This is the email content', 
                 body_html=email_body,
@@ -158,9 +156,6 @@ def TrainingStatus(entity):
         send=True
     )
 
-    
-
-      
 
 
 if __name__=='__main__':main()
