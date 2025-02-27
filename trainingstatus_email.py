@@ -141,7 +141,7 @@ def TrainingStatus(entity):
             print(f'email sent to {config.ADMIN_EMAIL}')
             logging.info(f'email sent to {supervisor.email} for {supervisor.username}')
             emails_sent.append(supervisor.username)
-            #  if supervisor gregg then send email to him  with greggs modules
+            #  if supervisor gregg then send email to him  with greggs training modules
             #
             
         except Exception as e:
