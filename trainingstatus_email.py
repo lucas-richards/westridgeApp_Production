@@ -132,14 +132,16 @@ def TrainingStatus(entity):
             
             Group47.send_email(
                 to_address={supervisor.email}, 
+                # to_address={config.ADMIN_EMAIL},
                 subject="Training Status", 
                 body_text='This is the email content', 
                 body_html=email_body,
                 send=True
             )
-            # print(f'email sent to {supervisor.email}')
-            print(f'email sent to {config.ADMIN_EMAIL}')
-            logging.info(f'email sent to {supervisor.email} for {supervisor.username}')
+            print(f'email sent to {supervisor.email}')
+            # print(f'email sent to {config.ADMIN_EMAIL}')
+            print(f'for {supervisor.username}')
+            # logging.info(f'email sent to {supervisor.email} for {supervisor.username}')
             emails_sent.append(supervisor.username)
             #  if supervisor gregg then send email to him  with greggs training modules
             #
