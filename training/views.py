@@ -1,4 +1,6 @@
-
+import acumatica.AliveDataTools_v105 as AliveDataTools
+import xml.etree.ElementTree as ET
+from datetime import date
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -961,3 +963,94 @@ def file_not_found(request, file_name):
         messages.error(request, 'File not found!')
         return redirect('training-grid')
 
+def kpis(request):
+    # Fetch all orders with status 'Back Order' using odataquery
+    
+    results = getAcumatica_data(
+                gi='Back order board V2', 
+                # filter qtySOBackOrdered > 0
+                top=0,
+                debug=True,
+                )
+    # Filter results where 'Back Ordered (POs-available)' is greater than zero
+    results = [item for item in results if float(item.get('BackOrderedPOsavailable', 0)) > 0]
+    # Round the 'BackOrderedPOsavailable' value for all items without decimals
+    for item in results:
+        if 'BackOrderedPOsavailable' in item:
+            item['BackOrderedPOsavailable'] = round(float(item['BackOrderedPOsavailable']))
+    total_items = len(results)
+    source_purchasing_count = sum(1 for item in results if item.get('Source') == 'Purchase')
+    source_kit_assembly_count = sum(1 for item in results if item.get('Source') == 'Kit Assembly')
+    total_backordered_pos_available = sum(float(item.get('Back Ordered (POs-available)', 0)) for item in results)
+
+    # Calculate days since 10/14/2024
+    start_date = date(2024, 10, 14)
+    today = date.today()
+    days_without_incidents = (today - start_date).days
+
+    # Sort by 'Back Ordered (POs-available)' in descending order and get the top 5
+    top_five_backordered = sorted(
+        results, 
+        key=lambda x: float(x.get('BackOrderedPOsavailable', 0)), 
+        reverse=True
+    )[:10]
+    print('top_five_backordered:', top_five_backordered)
+    print('total_items:', total_items)
+    print('source_purchasing_count:', source_purchasing_count)
+    print('source_kit_assembly_count:', source_kit_assembly_count)
+
+    context = {
+        'total_items': total_items,
+        'source_purchasing_count': source_purchasing_count,
+        'source_kit_assembly_count': source_kit_assembly_count,
+        'total_backordered_pos_available': total_backordered_pos_available,
+        'top_five_backordered': top_five_backordered,
+        'days_without_incidents': days_without_incidents,
+    }
+    return render(request, 'training/kpis.html', context)
+# A1006_Attributes,replenishmentSource,inventoryCD_description,A1011_Attributes,Back Ordered (POs-available),itemType,qtySOBackOrdered
+
+# Input Variables:
+    #   gi: The Acumatica generic inquiry where the data of interest exists. 
+    #   fields: list of fields to return, odata format i.e. 'TaxID,Description,TaxSchedule'. Uses the odata select parameter.
+    #   filter: return records filter parameter, odata format i.e. "startswith(Customer,'LC')"
+    #   top: limit the number of records to return. If 0, top is ignored. Default is 0.
+    #   html: raw html that bypasses all other variable to send in the request. 
+
+def getAcumatica_data(gi='', fields='', filter='', top=0, html='', debug='maybe',):
+    # Fetch all orders with status 'Back Order' using odataquery
+    xml_content = AliveDataTools.OdataQuery(
+        gi  = gi,
+        fields = fields,
+        filter = filter,
+        top    = top,
+        html   = html,
+    )
+    
+    # Define namespaces used in the XML
+    namespaces = {
+        'atom': 'http://www.w3.org/2005/Atom',
+        'd': 'http://schemas.microsoft.com/ado/2007/08/dataservices',
+        'm': 'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
+    }
+
+    # Parse the XML
+    root = ET.fromstring(xml_content.text)
+
+    # Extract all entries
+    entries = root.findall('atom:entry', namespaces)
+
+    # Convert each entry's properties into a dictionary
+    results = []
+    for entry in entries:
+        props = entry.find('.//m:properties', namespaces)
+        entry_dict = {}
+        if props is not None:
+            for elem in props:
+                tag = elem.tag.split('}')[-1]  # strip namespace
+                entry_dict[tag] = elem.text
+        results.append(entry_dict)
+
+    # Now 'results' is a list of dictionaries
+   
+    return results
