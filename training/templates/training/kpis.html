@@ -20,11 +20,11 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <meta http-equiv="refresh" content="300">
+    
     <title>KPIs</title>
 </head>
 <body>
-    <div id="backordersCarousel" class="carousel slide" data-ride="carousel" data-interval="10000">
+    <div id="backordersCarousel" class="carousel slide" data-ride="carousel" data-interval="20000">
         <div class="carousel-inner">
             <!-- First Slide: Backorders -->
             <div class="carousel-item active">
@@ -164,6 +164,13 @@
             }
         });
         </script>
+        <script>
+            // Refresh every 5 minutes (300000 ms)
+            setTimeout(() => {
+                location.reload();
+            }, 300000);
+        </script>
+        
         
  
 </body>
