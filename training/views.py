@@ -982,9 +982,37 @@ def kpis(request):
     source_purchasing_count = sum(1 for item in results if item.get('Source') == 'Purchase')
     source_kit_assembly_count = sum(1 for item in results if item.get('Source') == 'Kit Assembly')
     total_backordered_pos_available = sum(float(item.get('Back Ordered (POs-available)', 0)) for item in results)
+    # calculate the difference in backorder items using the backorder kpi value from the beggining of the year and today value
+    start_of_year = datetime(datetime.now().year, 1, 1)
+    start_of_month = datetime(datetime.now().year, datetime.now().month, 1)
+
+    today = datetime.now()
+    bo_start_of_year = (
+        KPIValue.objects
+        .filter(kpi__name='Backorders', date=start_of_year)
+        .order_by('date')
+        .first()
+    )
+    bo_start_of_month = (
+        KPIValue.objects
+        .filter(kpi__name='Backorders', date=start_of_month)
+        .order_by('-date')
+        .first()
+    )
+    bo_today = (
+        KPIValue.objects
+        .filter(kpi__name='Backorders', date=today)
+        .order_by('-date')
+        .first()
+    )
+
+
+    ytd = bo_today.value - bo_start_of_year.value
+    mtd = bo_today.value - bo_start_of_month.value
+
 
     # Calculate days since 10/14/2024
-    start_date = date(2024, 10, 14)
+    start_date = date(2025, 1, 9)
     today = date.today()
     days_without_incidents = (today - start_date).days
 
@@ -998,6 +1026,8 @@ def kpis(request):
     print('total_items:', total_items)
     print('source_purchasing_count:', source_purchasing_count)
     print('source_kit_assembly_count:', source_kit_assembly_count)
+    print('ytd',ytd)
+    print('mtd',mtd)
 
     context = {
         'total_items': total_items,
@@ -1006,6 +1036,8 @@ def kpis(request):
         'total_backordered_pos_available': total_backordered_pos_available,
         'top_five_backordered': top_five_backordered,
         'days_without_incidents': days_without_incidents,
+        'mtd': int(mtd),
+        'ytd':int(ytd)
     }
     return render(request, 'training/kpis.html', context)
 # A1006_Attributes,replenishmentSource,inventoryCD_description,A1011_Attributes,Back Ordered (POs-available),itemType,qtySOBackOrdered

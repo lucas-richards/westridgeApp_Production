@@ -5,6 +5,8 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_projects.settings')
 django.setup()
 
+import acumatica.AliveDataTools_v105 as AliveDataTools
+import xml.etree.ElementTree as ET
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from datetime import date
@@ -13,6 +15,45 @@ import datetime as dt
 
 class Command(BaseCommand):
     help = 'Calculate and save daily KPI values'
+
+    def getAcumatica_data(gi='', fields='', filter='', top=0, html='', debug='maybe',):
+        # Fetch all orders with status 'Back Order' using odataquery
+        xml_content = AliveDataTools.OdataQuery(
+            gi  = 'Back order board V2',
+            fields = fields,
+            filter = filter,
+            top    = top,
+            html   = html,
+        )
+        print('xml_content', xml_content.text)
+        
+        # Define namespaces used in the XML
+        namespaces = {
+            'atom': 'http://www.w3.org/2005/Atom',
+            'd': 'http://schemas.microsoft.com/ado/2007/08/dataservices',
+            'm': 'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
+        }
+
+        # Parse the XML
+        root = ET.fromstring(xml_content.text)
+
+        # Extract all entries
+        entries = root.findall('atom:entry', namespaces)
+
+        # Convert each entry's properties into a dictionary
+        results = []
+        for entry in entries:
+            props = entry.find('.//m:properties', namespaces)
+            entry_dict = {}
+            if props is not None:
+                for elem in props:
+                    tag = elem.tag.split('}')[-1]  # strip namespace
+                    entry_dict[tag] = elem.text
+            results.append(entry_dict)
+
+        # Now 'results' is a list of dictionaries
+    
+        return results
     
     def save_kpi(self, kpi_name, value):
         today = date.today()
@@ -104,14 +145,27 @@ class Command(BaseCommand):
         training['not_performed'] = round(training['not_performed'] / training['total'] * 100) if training['total'] else 0
         retraining['not_performed'] = round(retraining['not_performed'] / retraining['total'] * 100) if retraining['total'] else 0
 
+        # back order kpi
+        results = self.getAcumatica_data(top=0,debug=True)
+        # Filter results where 'Back Ordered (POs-available)' is greater than zero
+        results = [item for item in results if float(item.get('BackOrderedPOsavailable', 0)) > 0]
+        # Round the 'BackOrderedPOsavailable' value for all items without decimals
+        for item in results:
+            if 'BackOrderedPOsavailable' in item:
+                item['BackOrderedPOsavailable'] = round(float(item['BackOrderedPOsavailable']))
+        total_items = len(results)
+
         self.save_kpi('Training Performed', training['performed'])
         self.save_kpi('Retraining Performed', retraining['performed'])
         self.save_kpi('Retraining Overdue', retraining['overdue'])
         self.save_kpi('Training Not Performed', training['not_performed'])
         self.save_kpi('Retraining Not Performed', retraining['not_performed'])
         self.save_kpi('Percentage Fully Trained', perc_fully_trained)
+        self.save_kpi('Backorders', total_items)
         
         self.stdout.write(self.style.SUCCESS('Successfully saved daily KPI values'))
+
+    
 
 # Call the function to calculate and save daily KPI values
 if __name__ == '__main__':

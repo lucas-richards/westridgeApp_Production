@@ -47,11 +47,24 @@
                     </div>
                     <div class="p-4 mx-3 border bg-light text-center shadow-sm rounded" style="width: 200px;">
                         <h5 class="font-weight-bold">MTD</h5>
-                        <p class="display-4 text-success">-2%</p>
+                        {% if mtd == 0 %}
+                            <p class="display-4">{{ mtd }}</p>
+                        {% elif mtd > 0 %}
+                            <p class="display-4 text-danger">+{{ mtd }}</p>
+                        {% else %}
+                            <p class="display-4 text-success">{{ mtd }}</p>
+                        {% endif %}
                     </div>
+                    
                     <div class="p-4 mx-3 border bg-light text-center shadow-sm rounded" style="width: 200px;">
                         <h5 class="font-weight-bold">YTD</h5>
-                        <p class="display-4 text-danger">+8%</p>
+                        {% if ytd == 0 %}
+                            <p class="display-4">{{ ytd }}</p>
+                        {% elif ytd > 0 %}
+                            <p class="display-4 text-danger">+{{ ytd }}</p>
+                        {% else %}
+                            <p class="display-4 text-success">{{ ytd }}</p>
+                        {% endif %}
                     </div>
                 </div>
 
