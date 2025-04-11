@@ -29,6 +29,7 @@ from django.shortcuts import get_object_or_404
 import os
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
+from django.http import JsonResponse
 
 
 
@@ -1007,8 +1008,8 @@ def kpis(request):
     )
 
 
-    ytd = bo_today.value - bo_start_of_year.value
-    mtd = bo_today.value - bo_start_of_month.value
+    ytd = total_items - bo_start_of_year.value
+    mtd = total_items - bo_start_of_month.value
 
 
     # Calculate days since 10/14/2024
@@ -1048,6 +1049,48 @@ def kpis(request):
     #   filter: return records filter parameter, odata format i.e. "startswith(Customer,'LC')"
     #   top: limit the number of records to return. If 0, top is ignored. Default is 0.
     #   html: raw html that bypasses all other variable to send in the request. 
+
+
+
+def kpi_data_json(request):
+    results = getAcumatica_data(gi='Back order board V2', top=0, debug=True)
+    results = [item for item in results if float(item.get('BackOrderedPOsavailable', 0)) > 0]
+    for item in results:
+        if 'BackOrderedPOsavailable' in item:
+            item['BackOrderedPOsavailable'] = round(float(item['BackOrderedPOsavailable']))
+
+    total_items = len(results)
+    source_purchasing_count = sum(1 for item in results if item.get('Source') == 'Purchase')
+    source_kit_assembly_count = sum(1 for item in results if item.get('Source') == 'Kit Assembly')
+    total_backordered_pos_available = sum(float(item.get('Back Ordered (POs-available)', 0)) for item in results)
+
+    start_of_year = datetime(datetime.now().year, 1, 1)
+    start_of_month = datetime(datetime.now().year, datetime.now().month, 1)
+    today = datetime.now()
+
+    bo_start_of_year = KPIValue.objects.filter(kpi__name='Backorders', date=start_of_year).first()
+    bo_start_of_month = KPIValue.objects.filter(kpi__name='Backorders', date=start_of_month).first()
+
+    ytd = total_items - bo_start_of_year.value if bo_start_of_year else 0
+    mtd = total_items - bo_start_of_month.value if bo_start_of_month else 0
+
+    start_date = date(2025, 1, 9)
+    days_without_incidents = (date.today() - start_date).days
+
+    top_five_backordered = sorted(results, key=lambda x: float(x.get('BackOrderedPOsavailable', 0)), reverse=True)[:10]
+    print('json data', total_items)
+
+    return JsonResponse({
+        'total_items': total_items,
+        'source_purchasing_count': source_purchasing_count,
+        'source_kit_assembly_count': source_kit_assembly_count,
+        'total_backordered_pos_available': total_backordered_pos_available,
+        'days_without_incidents': days_without_incidents,
+        'mtd': int(mtd),
+        'ytd': int(ytd),
+        'top_five_backordered': top_five_backordered,
+    })
+
 
 def getAcumatica_data(gi='', fields='', filter='', top=0, html='', debug='maybe',):
     # Fetch all orders with status 'Back Order' using odataquery

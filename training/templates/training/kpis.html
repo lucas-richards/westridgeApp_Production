@@ -24,7 +24,7 @@
     <title>KPIs</title>
 </head>
 <body>
-    <div id="backordersCarousel" class="carousel slide" data-ride="carousel" data-interval="20000">
+    <div id="backordersCarousel" class="carousel slide" data-ride="carousel" data-interval="10000">
         <div class="carousel-inner">
             <!-- First Slide: Backorders -->
             <div class="carousel-item active">
@@ -35,36 +35,24 @@
                 <div class="d-flex justify-content-center flex-wrap my-4">
                     <div class="p-4 mx-3 border bg-light text-center shadow-sm rounded" style="width: 200px;">
                         <h5 class="font-weight-bold">Total</h5>
-                        <p class="display-4 text-dark">{{ total_items }}</p>
+                        <p id="totalItems" class="display-4 text-dark">{{ total_items }}</p>
                     </div>
                     <div class="p-4 mx-3 border bg-light text-center shadow-sm rounded" style="width: 200px;">
                         <h5 class="font-weight-bold">Purchasing</h5>
-                        <p class="display-4 text-dark">{{ source_purchasing_count }}</p>
+                        <p id="sourcePurchasingCount" class="display-4 text-dark">{{ source_purchasing_count }}</p>
                     </div>
                     <div class="p-4 mx-3 border bg-light text-center shadow-sm rounded" style="width: 200px;">
                         <h5 class="font-weight-bold">Kit Assembly</h5>
-                        <p class="display-4 text-dark">{{ source_kit_assembly_count }}</p>
+                        <p id="sourceKitAssemblyCount" class="display-4 text-dark">{{ source_kit_assembly_count }}</p>
                     </div>
                     <div class="p-4 mx-3 border bg-light text-center shadow-sm rounded" style="width: 200px;">
                         <h5 class="font-weight-bold">MTD</h5>
-                        {% if mtd == 0 %}
-                            <p class="display-4">{{ mtd }}</p>
-                        {% elif mtd > 0 %}
-                            <p class="display-4 text-danger">+{{ mtd }}</p>
-                        {% else %}
-                            <p class="display-4 text-success">{{ mtd }}</p>
-                        {% endif %}
+                        <p id="mtd" class="display-4 {% if mtd > 0 %}text-danger{% elif mtd == 0 %}{% else %}text-success{% endif %}">{{ mtd }}</p>
                     </div>
                     
                     <div class="p-4 mx-3 border bg-light text-center shadow-sm rounded" style="width: 200px;">
                         <h5 class="font-weight-bold">YTD</h5>
-                        {% if ytd == 0 %}
-                            <p class="display-4">{{ ytd }}</p>
-                        {% elif ytd > 0 %}
-                            <p class="display-4 text-danger">+{{ ytd }}</p>
-                        {% else %}
-                            <p class="display-4 text-success">{{ ytd }}</p>
-                        {% endif %}
+                        <p id="ytd" class="display-4 {% if ytd > 0 %}text-danger{% elif ytd == 0 %}{% else %}text-success{% endif %}">{{ ytd }}</p>
                     </div>
                 </div>
 
@@ -78,7 +66,7 @@
                                 <th>Total Backordered</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="topBackorderedList">
                             {% for item in top_five_backordered %}
                             <tr>
                                 <td>{{ item.InventoryID }}</td>
@@ -100,7 +88,7 @@
                 <div class="d-flex justify-content-center flex-wrap my-4">
                     <div class="p-5 mx-4 border bg-light text-center shadow-sm rounded" style="width: 300px;">
                         <h3 class="font-weight-bold">Days Without Incident</h3>
-                        <p class="display-2 text-success">{{ days_without_incidents }}</p>
+                        <p id="daysWithoutIncidents" class="display-2 text-success">{{ days_without_incidents }}</p>
                         <div id="clock" class="text-muted h5">
                     </div>
 
@@ -164,12 +152,35 @@
             }
         });
         </script>
+
+        <!-- update dashboard -->
         <script>
-            // Refresh every 5 minutes (300000 ms)
-            setTimeout(() => {
-                location.reload();
-            }, 300000);
+            function updateDashboard() {
+                fetch("{% url 'kpi-data-json' %}")
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById("totalItems").textContent = data.total_items;
+                        document.getElementById("sourcePurchasingCount").textContent = data.source_purchasing_count;
+                        document.getElementById("sourceKitAssemblyCount").textContent = data.source_kit_assembly_count;
+                        document.getElementById("daysWithoutIncidents").textContent = data.days_without_incidents;
+                        document.getElementById("mtd").textContent = data.mtd;
+                        document.getElementById("ytd").textContent = data.ytd;
+            
+                        const tableBody = document.getElementById("topBackorderedList");
+                        tableBody.innerHTML = "";
+                        data.top_five_backordered.forEach(item => {
+                            const row = `<tr><td>${item.InventoryID}</td><td>${item.Description}</td><td>${item.BackOrderedPOsavailable}</td></tr>`;
+                            tableBody.insertAdjacentHTML('beforeend', row);
+                        });
+                    });
+            }
+            
+            // Initial call
+            updateDashboard();
+            // Every 5 minutes
+            setInterval(updateDashboard, 60000); // 1 min = 60,000 ms
         </script>
+        
         
         
  
