@@ -71,7 +71,7 @@
                             <tr>
                                 <td>{{ item.InventoryID }}</td>
                                 <td>{{ item.Description }}</td>
-                                <td class="text-right">{{ item.BackOrderedPOsavailable }}</td>
+                                <td class="text-right">{{ item.BackOrdered }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -169,7 +169,7 @@
                         const tableBody = document.getElementById("topBackorderedList");
                         tableBody.innerHTML = "";
                         data.top_five_backordered.forEach(item => {
-                            const row = `<tr><td>${item.InventoryID}</td><td>${item.Description}</td><td>${item.BackOrderedPOsavailable}</td></tr>`;
+                            const row = `<tr><td>${item.InventoryID}</td><td>${item.Description}</td><td class="text-right">${item.BackOrdered}</td></tr>`;
                             tableBody.insertAdjacentHTML('beforeend', row);
                         });
                     });

@@ -974,11 +974,11 @@ def kpis(request):
                 debug=True,
                 )
     # Filter results where 'Back Ordered (POs-available)' is greater than zero
-    results = [item for item in results if float(item.get('BackOrderedPOsavailable', 0)) > 0]
-    # Round the 'BackOrderedPOsavailable' value for all items without decimals
+    results = [item for item in results if float(item.get('BackOrdered', 0)) > 0]
+    # Round the 'BackOrdered' value for all items without decimals
     for item in results:
-        if 'BackOrderedPOsavailable' in item:
-            item['BackOrderedPOsavailable'] = round(float(item['BackOrderedPOsavailable']))
+        if 'BackOrdered' in item:
+            item['BackOrdered'] = round(float(item['BackOrdered']))
     total_items = len(results)
     source_purchasing_count = sum(1 for item in results if item.get('Source') == 'Purchase')
     source_kit_assembly_count = sum(1 for item in results if item.get('Source') == 'Kit Assembly')
@@ -1020,7 +1020,7 @@ def kpis(request):
     # Sort by 'Back Ordered (POs-available)' in descending order and get the top 5
     top_five_backordered = sorted(
         results, 
-        key=lambda x: float(x.get('BackOrderedPOsavailable', 0)), 
+        key=lambda x: float(x.get('BackOrdered', 0)), 
         reverse=True
     )[:10]
     print('top_five_backordered:', top_five_backordered)
@@ -1054,10 +1054,10 @@ def kpis(request):
 
 def kpi_data_json(request):
     results = getAcumatica_data(gi='Back order board V2', top=0, debug=True)
-    results = [item for item in results if float(item.get('BackOrderedPOsavailable', 0)) > 0]
+    results = [item for item in results if float(item.get('BackOrdered', 0)) > 0]
     for item in results:
-        if 'BackOrderedPOsavailable' in item:
-            item['BackOrderedPOsavailable'] = round(float(item['BackOrderedPOsavailable']))
+        if 'BackOrdered' in item:
+            item['BackOrdered'] = round(float(item['BackOrdered']))
 
     total_items = len(results)
     source_purchasing_count = sum(1 for item in results if item.get('Source') == 'Purchase')
@@ -1077,7 +1077,7 @@ def kpi_data_json(request):
     start_date = date(2025, 1, 9)
     days_without_incidents = (date.today() - start_date).days
 
-    top_five_backordered = sorted(results, key=lambda x: float(x.get('BackOrderedPOsavailable', 0)), reverse=True)[:10]
+    top_five_backordered = sorted(results, key=lambda x: float(x.get('BackOrdered', 0)), reverse=True)[:10]
     print('json data', total_items)
 
     return JsonResponse({
