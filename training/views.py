@@ -1048,7 +1048,7 @@ def kpis(request):
     #   fields: list of fields to return, odata format i.e. 'TaxID,Description,TaxSchedule'. Uses the odata select parameter.
     #   filter: return records filter parameter, odata format i.e. "startswith(Customer,'LC')"
     #   top: limit the number of records to return. If 0, top is ignored. Default is 0.
-    #   html: raw html that bypasses all other variable to send in the request. 
+    #   html: raw html that bypasses all other variable to send in the request.  Using import xml.etree.ElementTree as ET to transform the data
 
 
 
@@ -1060,8 +1060,8 @@ def kpi_data_json(request):
             item['BackOrdered'] = round(float(item['BackOrdered']))
 
     total_items = len(results)
-    source_purchasing_count = sum(1 for item in results if item.get('Source') == 'Purchase')
-    source_kit_assembly_count = sum(1 for item in results if item.get('Source') == 'Kit Assembly')
+    source_purchasing_count = sum(1 for item in results if item.get('Source') in {'Purchase', 'Purchase to Order'})
+    source_kit_assembly_count = sum(1 for item in results if item.get('Source') in {'Kit Assembly', 'Manufacturing'})
     total_backordered_pos_available = sum(float(item.get('Back Ordered (POs-available)', 0)) for item in results)
 
     start_of_year = datetime(datetime.now().year, 1, 1)
