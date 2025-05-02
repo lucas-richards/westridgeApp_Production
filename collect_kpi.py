@@ -25,7 +25,6 @@ class Command(BaseCommand):
             top    = top,
             html   = html,
         )
-        print('xml_content', xml_content.text)
         
         # Define namespaces used in the XML
         namespaces = {
@@ -148,12 +147,13 @@ class Command(BaseCommand):
         # back order kpi
         results = self.getAcumatica_data(top=0,debug=True)
         # Filter results where 'Back Ordered (POs-available)' is greater than zero
-        results = [item for item in results if float(item.get('BackOrderedPOsavailable', 0)) > 0]
+        results = [item for item in results if float(item.get('BackOrdered', 0)) > 0]
         # Round the 'BackOrderedPOsavailable' value for all items without decimals
         for item in results:
             if 'BackOrderedPOsavailable' in item:
                 item['BackOrderedPOsavailable'] = round(float(item['BackOrderedPOsavailable']))
         total_items = len(results)
+        print('Total items with back orders:', total_items)
 
         self.save_kpi('Training Performed', training['performed'])
         self.save_kpi('Retraining Performed', retraining['performed'])

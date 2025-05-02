@@ -582,7 +582,7 @@ if __name__ == "__main__":
             if back_order_til:
                 backorder_sku_list.append((InventoryID))
         output = f'{", ".join(backorder_sku_list)}\n'
-        print(output)
+        
 
     # 5 Full Inventory Query
     #

@@ -1072,8 +1072,8 @@ def kpi_data_json(request):
     print('year',bo_start_of_year)
     bo_start_of_month = KPIValue.objects.filter(kpi__name='Backorders', date=start_of_month).first()
     print('month',bo_start_of_month)
-    ytd = bo_start_of_year.value - total_items if bo_start_of_year else 0
-    mtd = bo_start_of_month.value - total_items if bo_start_of_month else 0
+    ytd = total_items - bo_start_of_year.value if bo_start_of_year else 0
+    mtd = total_items - bo_start_of_month.value if bo_start_of_month else 0
 
     start_date = date(2025, 1, 9)
     days_without_incidents = (date.today() - start_date).days
