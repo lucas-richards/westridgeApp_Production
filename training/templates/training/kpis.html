@@ -47,12 +47,12 @@
                     </div>
                     <div class="p-4 mx-3 border bg-light text-center shadow-sm rounded" style="width: 200px;">
                         <h5 class="font-weight-bold">MTD</h5>
-                        <p id="mtd" class="display-4 {% if mtd > 0 %}text-danger{% elif mtd == 0 %}{% else %}text-success{% endif %}">{{ mtd }}</p>
+                        <p id="mtd" class="display-4 ">{{ mtd }}</p>
                     </div>
                     
                     <div class="p-4 mx-3 border bg-light text-center shadow-sm rounded" style="width: 200px;">
                         <h5 class="font-weight-bold">YTD</h5>
-                        <p id="ytd" class="display-4 {% if ytd > 0 %}text-danger{% elif ytd == 0 %}{% else %}text-success{% endif %}">{{ ytd }}</p>
+                        <p id="ytd" class="display-4 ">{{ ytd }}</p>
                     </div>
                 </div>
 
@@ -164,7 +164,25 @@
                         document.getElementById("sourceKitAssemblyCount").textContent = data.source_kit_assembly_count;
                         document.getElementById("daysWithoutIncidents").textContent = data.days_without_incidents;
                         document.getElementById("mtd").textContent = data.mtd;
+                        if (data.mtd < 0) {
+                            document.getElementById("mtd").classList.remove("text-danger");
+                            document.getElementById("mtd").classList.add("text-success");
+                        } else if (data.mtd > 0) {
+                            document.getElementById("mtd").classList.remove("text-success");
+                            document.getElementById("mtd").classList.add("text-danger");
+                        } else {
+                            document.getElementById("mtd").classList.remove("text-success", "text-danger");
+                        }
                         document.getElementById("ytd").textContent = data.ytd;
+                        if (data.ytd < 0) {
+                            document.getElementById("ytd").classList.remove("text-danger");
+                            document.getElementById("ytd").classList.add("text-success");
+                        } else if (data.ytd > 0) {
+                            document.getElementById("ytd").classList.remove("text-success");
+                            document.getElementById("ytd").classList.add("text-danger");
+                        } else {
+                            document.getElementById("ytd").classList.remove("text-success", "text-danger");
+                        }
             
                         const tableBody = document.getElementById("topBackorderedList");
                         tableBody.innerHTML = "";

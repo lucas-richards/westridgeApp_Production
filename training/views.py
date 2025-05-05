@@ -1013,7 +1013,7 @@ def kpis(request):
 
 
     # Calculate days since 10/14/2024
-    start_date = date(2025, 1, 9)
+    start_date = date(2025, 5, 2)
     today = date.today()
     days_without_incidents = (today - start_date).days
 
@@ -1075,7 +1075,7 @@ def kpi_data_json(request):
     ytd = total_items - bo_start_of_year.value if bo_start_of_year else 0
     mtd = total_items - bo_start_of_month.value if bo_start_of_month else 0
 
-    start_date = date(2025, 1, 9)
+    start_date = date(2025, 5, 2)
     days_without_incidents = (date.today() - start_date).days
 
     top_five_backordered = sorted(results, key=lambda x: float(x.get('BackOrdered', 0)), reverse=True)[:10]
