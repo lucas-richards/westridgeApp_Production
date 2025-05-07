@@ -61,9 +61,10 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>Inventory ID</th>
-                                <th>Description</th>
-                                <th>Total Backordered</th>
+                                <th style="width: 10%;">Inventory ID</th>
+                                <th style="width: 70%;">Description</th>
+                                <th style="width: 10%;">Total Backordered</th>
+                                <th class="text-center" style="width: 10%;">Worth</th>
                             </tr>
                         </thead>
                         <tbody id="topBackorderedList">
@@ -72,6 +73,7 @@
                                 <td>{{ item.InventoryID }}</td>
                                 <td>{{ item.Description }}</td>
                                 <td class="text-right">{{ item.BackOrdered }}</td>
+                                <td class="text-right">{{ item.Worth }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -187,7 +189,7 @@
                         const tableBody = document.getElementById("topBackorderedList");
                         tableBody.innerHTML = "";
                         data.top_five_backordered.forEach(item => {
-                            const row = `<tr><td>${item.InventoryID}</td><td>${item.Description}</td><td class="text-right">${item.BackOrdered}</td></tr>`;
+                            const row = `<tr><td>${item.InventoryID}</td><td>${item.Description}</td><td class="text-right">${item.BackOrdered}</td><td class="text-right">$${Number(item.Worth).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td></tr>`;
                             tableBody.insertAdjacentHTML('beforeend', row);
                         });
                     });

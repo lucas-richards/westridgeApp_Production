@@ -973,8 +973,10 @@ def kpis(request):
                 top=0,
                 debug=True,
                 )
+    
     # Filter results where 'Back Ordered (POs-available)' is greater than zero
-    results = [item for item in results if float(item.get('BackOrdered', 0)) > 0]
+    results = [item for item in results if item.get('BackOrdered') and float(item.get('BackOrdered', 0)) > 0]
+    print('results:', results)
     # Round the 'BackOrdered' value for all items without decimals
     for item in results:
         if 'BackOrdered' in item:
@@ -1054,7 +1056,7 @@ def kpis(request):
 
 def kpi_data_json(request):
     results = getAcumatica_data(gi='Back order board V2', top=0, debug=True)
-    results = [item for item in results if float(item.get('BackOrdered', 0)) > 0]
+    results = [item for item in results if item.get('BackOrdered') and float(item.get('BackOrdered', 0)) > 0]
     for item in results:
         if 'BackOrdered' in item:
             item['BackOrdered'] = round(float(item['BackOrdered']))
