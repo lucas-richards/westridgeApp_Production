@@ -30,7 +30,7 @@ urlpatterns = [
     # path('api/dashboard', views.api_dashboard, name='training-api-dashboard'),
     # path('api/TrainingModules', TrainingModules.as_view(), name='TrainingModules'),
     # path('api/TrainingEvent', TrainingEvents.as_view(), name='TrainingEvent'),
-    path('kpis/', views.kpis, name='kpis'),
+    path('kpis/', views.kpis, name='training-kpis'),
     path('kpis/data/', views.kpi_data_json, name='kpi-data-json'),
 
 ]
