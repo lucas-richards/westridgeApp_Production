@@ -1,0 +1,31 @@
+{% extends "process/tabs_nav.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<!-- case detail -->
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Case Detail</h2>
+            <p>Case ID: {{ case.id }}</p>
+            <p>Description: {{ case.description }}</p>
+            <p>Created At: {{ case.created_at }}</p>
+            <p>Status: {{ case.status }}</p>
+            <p>Assigned To: {{ case.assigned_to }}</p>
+        </div>
+    </div>
+
+    <!-- Add any additional details you want to display here -->
+            <p>Created At: {{ case.created_at }}</p>
+            <p>Status: {{ case.status }}</p>
+        </div>
+    </div>
+
+    <!-- Add any additional details you want to display here -->
+
+
+
+
+
+{% endblock content %}
+

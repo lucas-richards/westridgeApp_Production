@@ -35,3 +35,17 @@ def case_detail(request, case_id):
         'case': case,
     }
     return render(request, 'process/case_detail.html', context)
+
+def case_new(request):
+    if request.method == 'POST':
+        description = request.POST.get('description')
+        status = request.POST.get('status')
+        category = request.POST.get('category')
+        case = Case.objects.create(
+            description=description,
+            status=status,
+            category=category
+        )
+        return JsonResponse({'id': case.id, 'description': case.description, 'status': case.status, 'category': case.category})
+    else:
+        return render(request, 'process/case_new.html')
