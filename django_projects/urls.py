@@ -47,6 +47,7 @@ urlpatterns = [
     path('blog/', include('blog.urls')),
     path('', include('training.urls')),
     path('tasks/', include('tasks.urls')),
+    path('process/', include('process.urls')),
     # path('api/users', user_views.UserList.as_view(), name='user-list'),
     # path('api/login/', user_views.api_login, name='api-login'),
     

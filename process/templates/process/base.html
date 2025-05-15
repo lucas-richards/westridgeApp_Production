@@ -14,6 +14,8 @@
     <link rel="stylesheet" type="text/css" href="{% static 'training/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'tasks/main.css' %}">
     <link rel="shortcut icon" type="image/x-icon" href="/media/favicon.png">
+    <!-- JS table library -->
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
 
     {% if title %}
         <title>Westridge Labs - {{title}}</title>
@@ -23,59 +25,41 @@
 </head>
 <body>
     <header class="site-header">
-      <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+      <nav class="navbar navbar-expand-md navbar-dark" style="background-color: #ff6600; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
         <div class="container" style="max-width: 1440px;">
           <!-- add user picture if logged in -->
-            {% if user.is_authenticated %}
-          
-                <img id="profImage" src="{{user.profile.image.url}}" class="rounded-circle border" style="width: 40px; height: 40px;">
-              
-            {% endif %}
-        <a class="navbar-brand mr-4 ml-2" href="{% url 'training-dashboard' %}"><strong>ID</strong> Training</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarToggle">
+          {% if user.is_authenticated %}
+            <img id="profImage" src="{{user.profile.image.url}}" class="rounded-circle border" style="width: 40px; height: 40px;">
+          {% endif %}
+          <a class="navbar-brand mr-4 ml-2" href="{% url 'process-cases' %}" style="color: #fff;"><strong>ID</strong> Cases</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarToggle">
             <div class="navbar-nav mr-auto">
-              
-            <a class="nav-item nav-link" href="{% url 'training-dashboard' %}">Training</a>
-            <a class="nav-item nav-link" href="{% url 'training-kpis' %}">KPI</a>
-            <a class="nav-item nav-link" href="{% url 'process-cases' %}">Cases</a>
-            <!-- <a class="nav-item nav-link" href="{% url 'tasks-home' %}">Tasks</a> -->
-            
-            <!-- <div class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Forms
-              </a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="#">Purchase Request</a>
-                <a class="dropdown-item" href="#">Graphic Request</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#">Customer Complaint</a>
-                <a class="dropdown-item" href="#">Return</a>
-              </div>
-            </div> -->
+              <a class="nav-item nav-link" href="{% url 'training-dashboard' %}" style="color: #fff;">Training</a>
+              <a class="nav-item nav-link" href="{% url 'training-kpis' %}" style="color: #fff;">KPI</a>
+              <a class="nav-item nav-link" href="{% url 'process-cases' %}" style="color: #fff;">Cases</a>
+              <!-- <a class="nav-item nav-link" href="{% url 'tasks-home' %}">Tasks</a> -->
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
               {% if user.is_authenticated %}
-                <a class="nav-item nav-link" href="{% url 'profile' %}">Profile</a>
+                <a class="nav-item nav-link" href="{% url 'profile' %}" style="color: #fff;">Profile</a>
                 <!-- <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a> -->
-                
-                  <form action="{% url 'logout' %}" method="post">
-                    {% csrf_token %}
-                    <a href="#" class="nav-item nav-link" onclick="this.parentNode.submit(); return false;">Logout</a>
-                  </form>
-                
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                  {% csrf_token %}
+                  <a href="#" class="nav-item nav-link" style="color: #fff;" onclick="this.parentNode.submit(); return false;">Logout</a>
+                </form>
                 {% if user.is_superuser %}
-                  <a class="nav-item nav-link" href="{% url 'admin:index' %}">Admin</a>
+                  <a class="nav-item nav-link" href="{% url 'admin:index' %}" style="color: #fff;">Admin</a>
                 {% endif %}
               {% else %}
-                <a class="nav-item nav-link" href="{% url 'get-code' %}">Login</a>
+                <a class="nav-item nav-link" href="{% url 'get-code' %}" style="color: #fff;">Login</a>
                 <!-- <a class="nav-item nav-link" href="{% url 'register' %}">Register</a> -->
               {% endif %}
             </div>
-        </div>
+          </div>
         </div>
       </nav>
     </header>

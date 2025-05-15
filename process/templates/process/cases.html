@@ -1,0 +1,94 @@
+{% extends "process/tabs_nav.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+
+
+
+<style>
+    .flex-container {
+        display: flex;
+        align-items:center;
+        justify-content: space-between;
+    }
+    @media (min-width: 1200px) {
+        .container {
+            max-width: 1740px;
+        }
+    }
+</style>
+{% if rowData %}
+    <!-- orders count -->
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col-md-12">
+                <p>Cases: {{ cases_count }}</p>
+            </div>
+        </div>
+    </div>
+    <!-- Your Data Grid container -->
+    <div id="myGrid" class="mt-3" style="height: 700px"></div>
+
+
+            
+    <!-- if there are no cases yet -->
+{% else %}
+        <p class="m-3">No cases yet</p>
+{% endif %}
+
+   
+    <!-- table JS -->
+<script> 
+    const row = {{ rowData|safe }};
+    row.forEach(item => {
+        item.created_at = new Date(item.created_at);
+    });
+    console.log(row);
+   
+   const gridOptions = {
+       defaultColDef: {
+           width: 200,
+           editable: true,
+           
+       },
+       
+       
+    columnDefs: [
+        { headerName: "Case#", field: "id",  editable: false, 
+          cellRenderer: function(params) {
+           return `<a href="/process/cases/${params.value}/">${params.value}</a>`;
+          }
+        },
+        { headerName: "Status", field: "status",  sortable: true, filter: true, editable: false },
+        { headerName: "Description", field: "description",  sortable: true, filter: true, editable: false },
+        { headerName:"Category", field: "category", sortable: true, filter: true, editable: false },
+        { headerName: "Created At", field: "created_at", sortable: true, filter: true, editable: false,
+          valueFormatter: function(params) {
+             if (!params.value) return '';
+               const date = new Date(params.value);
+               const day = String(date.getDate()).padStart(2, '0');
+               const month = String(date.getMonth() + 1).padStart(2, '0');
+               const year = date.getFullYear();
+              if (day === 'NaN' ) return '';
+               return `${month}-${day}-${year}`;
+         }
+         },
+            
+           
+           
+       ],
+       rowData: row,
+
+
+       
+   };
+
+   // Initialize AG Grid
+   const myGridElement = document.querySelector('#myGrid');
+   agGrid.createGrid(myGridElement, gridOptions);
+
+   
+</script>
+
+{% endblock content %}
+
