@@ -4,24 +4,125 @@
 
 <!-- case detail -->
 <div class="container mt-3">
+    <div class="d-flex align-items-center mb-2">
+        <h2 class="mb-0 mr-2">Case #{{ case.id }} Details</h2>
+        <small>
+            <a href="{% url 'process-case-edit' case.id %}">Edit</a>
+        </small>
+    </div>
     <div class="row">
-        <div class="col-md-12">
-            <h2>Case Detail</h2>
-            <p>Case ID: {{ case.id }}</p>
-            <p>Description: {{ case.description }}</p>
+        <div class="col-md-8">
+            <p>{{ case.description }}</p>
             <p>Created At: {{ case.created_at }}</p>
             <p>Status: {{ case.status }}</p>
             <p>Assigned To: {{ case.assigned_to }}</p>
         </div>
-    </div>
-
-    <!-- Add any additional details you want to display here -->
-            <p>Created At: {{ case.created_at }}</p>
-            <p>Status: {{ case.status }}</p>
+        <div class="col-md-4 d-flex flex-column align-items-end justify-content-start">
+            <a href="{% url 'process-customer-complaint-new' case.id %}" class="btn btn-sm btn-primary mb-2 text-center" style="min-width: 200px;">
+                <span class="mr-1">+</span> Customer Complaint
+            </a>
+            <a href="{% url 'process-return-new' case.id %}" class="btn btn-sm btn-primary mb-2 text-center" style="min-width: 200px;">
+                <span class="mr-1">+</span> Return
+            </a>
+            <a href="{% url 'process-credit-new' case.id %}" class="btn btn-sm btn-primary text-center" style="min-width: 200px;">
+                <span class="mr-1">+</span> Credit
+            </a>
+            
         </div>
     </div>
-
-    <!-- Add any additional details you want to display here -->
+    <!-- add something nice to show if it's a complaint is_complaint, is_return and is_credit they are booleans -->
+    {% if case.is_complaint %}
+        <span class="badge badge-secondary mr-1">Complaint</span>
+    {% endif %}
+    {% if case.is_return %}
+        <span class="badge badge-secondary mr-1">Return</span>
+    {% endif %}
+    {% if case.is_credit %}
+        <span class="badge badge-secondary">Credit</span>
+    {% endif %}
+    <hr>
+    <div class="row">
+        <!-- Customer Complaints Column -->
+        <div class="col-md-4">
+            <h3>Customer Complaints</h3>
+            {% if complaints %}
+                {% for complaint in complaints %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <h5 class="mb-0 mr-2">Complaint #{{ complaint.number }}</h5>
+                                <small>
+                                    <a href="{% url 'process-complaint-edit' case.id complaint.id %}">Edit</a>
+                                </small>
+                            </div>
+                            <p class="card-text">Description: {{ complaint.description }}</p>
+                            <p class="card-text">Created At: {{ complaint.created_at }}</p>
+                            <p class="card-text">Status: {{ complaint.status }}</p>
+                            
+                            
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No customer complaints found for this case.</p>
+            {% endif %}
+        </div>
+        <!-- Returns Column -->
+        <div class="col-md-4">
+            <h3>Returns</h3>
+            {% if returns %}
+                {% for return_item in returns %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <h5 class="mb-0 mr-2">Return #{{ return_item.number }}</h5>
+                                <small>
+                                    <a href="{% url 'process-return-edit' case.id return_item.id %}">Edit</a>
+                                </small>
+                            </div>
+                            <p class="card-text">Description: {{ return_item.description }}</p>
+                            <p class="card-text">Created At: {{ return_item.created_at }}</p>
+                            <p class="card-text">Status: {{ return_item.status }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No returns found for this case.</p>
+            {% endif %}
+        </div>
+        <!-- Credits Column -->
+        <div class="col-md-4">
+            <h3>Credits</h3>
+            {% if credits %}
+                {% for credit in credits %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <h5 class="mb-0 mr-2">Credit #{{ credit.number }}</h5>
+                                <small>
+                                    <a href="{% url 'process-credit-edit' case.id credit.id %}">Edit</a>
+                                </small>
+                            </div>
+                            <p class="card-text">Description: {{ credit.description }}</p>
+                            <p class="card-text">Created At: {{ credit.created_at }}</p>
+                            <p class="card-text">Status: {{ credit.status }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No credits found for this case.</p>
+            {% endif %}
+        </div>
+    </div>
+    <hr>
+    <!--  a delete case button on the bottom of the screen to the left -->
+    <div class="d-flex justify-content-start mb-3 ml-3">
+        <a href="{% url 'process-case-delete' case.id %}" class="btn btn-sm btn-outline-danger"
+           onclick="return confirm('Are you sure you want to delete this case?');">
+            Delete Case
+        </a>
+    </div>
+</div>
 
 
 

@@ -57,12 +57,12 @@
        
        
     columnDefs: [
-        { headerName: "Case#", field: "id",  editable: false, 
+        { headerName: "Case#", field: "id", width: 70, editable: false, 
           cellRenderer: function(params) {
            return `<a href="/process/cases/${params.value}/">${params.value}</a>`;
           }
         },
-        { headerName: "Status", field: "status",  sortable: true, filter: true, editable: false },
+        { headerName: "Status", field: "status", width: 100, sortable: true, filter: true, editable: false },
         { headerName: "Description", field: "description",  sortable: true, filter: true, editable: false },
         { headerName:"Category", field: "category", sortable: true, filter: true, editable: false },
         { headerName: "Created At", field: "created_at", sortable: true, filter: true, editable: false,
@@ -75,7 +75,81 @@
               if (day === 'NaN' ) return '';
                return `${month}-${day}-${year}`;
          }
-         },
+        //  add customer complaint, return and credit if there is no value then add text is needed?
+        },
+        {
+            headerName: "Customer Complaint",
+            field: "complaints_count",
+            sortable: true,
+            filter: true,
+            editable: false,
+            valueGetter: function(params) {
+                // If complaints_count is 0 and is_complaint is true, show "Missing"
+                if (
+                    (params.data.complaints_count === 0 || params.data.complaints_count === "0") &&
+                    params.data.is_complaint === true
+                ) {
+                    return "Missing";
+                }
+                // If complaints_count is 0 and is_complaint is not true, show "N/A"
+                if (
+                    (params.data.complaints_count === 0 || params.data.complaints_count === "0") &&
+                    params.data.is_complaint !== true
+                ) {
+                    return "N/A";
+                }
+                return params.data.complaints_count;
+            }
+        },
+        {
+            headerName: "Return",
+            field: "returns_count",
+            sortable: true,
+            filter: true,
+            editable: false,
+            valueGetter: function(params) {
+            // If returns_count is 0 and is_return is true, show "Missing"
+            if (
+                (params.data.returns_count === 0 || params.data.returns_count === "0") &&
+                params.data.is_return === true
+            ) {
+                return "Missing";
+            }
+            // If returns_count is 0 and is_return is not true, show "N/A"
+            if (
+                (params.data.returns_count === 0 || params.data.returns_count === "0") &&
+                params.data.is_return !== true
+            ) {
+                return "N/A";
+            }
+            return params.data.returns_count;
+            }
+        },
+        {
+            headerName: "Credit",
+            field: "credits_count",
+            sortable: true,
+            filter: true,
+            editable: false,
+            valueGetter: function(params) {
+            // If credits_count is 0 and is_credit is true, show "Missing"
+            if (
+                (params.data.credits_count === 0 || params.data.credits_count === "0") &&
+                params.data.is_credit === true
+            ) {
+                return "Missing";
+            }
+            // If credits_count is 0 and is_credit is not true, show "N/A"
+            if (
+                (params.data.credits_count === 0 || params.data.credits_count === "0") &&
+                params.data.is_credit !== true
+            ) {
+                return "N/A";
+            }
+            return params.data.credits_count;
+            }
+        
+        },
             
            
            
