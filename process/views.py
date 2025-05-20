@@ -18,9 +18,8 @@ def cases(request):
     row_data = [
         {
             'id': case.id,
-            'description': case.description,
+            'title': case.title,
             'status': case.status,
-            'category': case.category.title,
             'created_at': case.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'is_complaint': case.is_complaint,
             'is_return': case.is_return,

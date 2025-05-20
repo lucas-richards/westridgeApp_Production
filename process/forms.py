@@ -3,23 +3,18 @@ from .models import Case, CustomerComplaint, Return, Credit, Category
 from .models import Category
 
 class CaseForm(forms.ModelForm):
-    category = forms.ModelChoiceField(
-        queryset=Category.objects.all(),
-        widget=forms.Select(),
-        label='Category'
-    )
 
     class Meta:
         model = Case
-        fields = ['description', 'status', 'category', 'is_complaint', 'is_return', 'is_credit']
+        fields = ['customer_number','customer_name','title',  'is_complaint', 'is_return', 'is_credit', 'is_scrap']
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
             'status': forms.Select(),
         }
         labels = {
-            'description': 'Case Description',
-            'status': 'Status',
-            'category': 'Category',
+            'is_complaint': 'Complaint',
+            'is_return': 'Return',
+            'is_credit': 'Credit',
+            'is_scrap': 'Scrap',
         }
 
 class CustomerComplaintForm(forms.ModelForm):
@@ -40,15 +35,52 @@ class CustomerComplaintForm(forms.ModelForm):
 class ReturnForm(forms.ModelForm):
     class Meta:
         model = Return
-        fields = ['case','number','status','authorized', 'reason', 'item_condition']
+        fields = [
+            'case',
+            'number',
+            'status',
+            'authorized',
+            'reason',
+            'item_condition',
+            'file',
+            'fees',
+            'charges',
+            'taxes',
+            'call_tags',
+            'est_cost',
+            'carrier_claim_number',
+            'carrier_tracking_number',
+            'replacement_invoice_number',
+            'replacement_shipped',
+            'payment_method_requested',
+            'requested_credit_amount',
+        ]
         widgets = {
             'reason': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
             'item_condition': forms.TextInput(attrs={'placeholder': 'Enter item condition'}),
+            'file': forms.ClearableFileInput(),
+            'est_cost': forms.NumberInput(attrs={'placeholder': 'Estimated cost'}),
+            'carrier_claim_number': forms.TextInput(attrs={'placeholder': 'Carrier claim number'}),
+            'carrier_tracking_number': forms.TextInput(attrs={'placeholder': 'Carrier tracking number'}),
+            'replacement_invoice_number': forms.TextInput(attrs={'placeholder': 'Replacement invoice number'}),
+            'requested_credit_amount': forms.NumberInput(attrs={'placeholder': 'Requested credit amount'}),
         }
         labels = {
             'case': 'Related Case',
             'reason': 'Return Reason',
             'item_condition': 'Item Condition',
+            'file': 'Attachment',
+            'fees': '20% Restocking Fee Applies',
+            'charges': 'Shipping charges will added',
+            'taxes': 'Credit/Return is taxable',
+            'call_tags': 'Call Tags',
+            'est_cost': 'Estimated Cost',
+            'carrier_claim_number': 'Carrier Claim Number',
+            'carrier_tracking_number': 'Carrier Tracking Number',
+            # 'replacement_invoice_number': 'Replacement Invoice Number',  # Removed as requested
+            'replacement_shipped': 'Replacement Shipped',
+            'payment_method_requested': 'Payment Method Requested',
+            'requested_credit_amount': 'Requested Credit Amount',
         }
 
 class CreditForm(forms.ModelForm):
