@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-md-8 offset-md-2">
             {% if return_instance %}
-                <h2>Return #{{ return_item.number }}</h2>
+                <h2>Return #{{ return_instance.number }}</h2>
             {% else %}
                 <h2>New Return</h2>
             {% endif %}
@@ -15,6 +15,7 @@
                 {% csrf_token %}
                 {{ form|crispy }}
                 <button type="submit" class="btn btn-primary">Submit</button>
+                
             </form>
         </div>
     </div>

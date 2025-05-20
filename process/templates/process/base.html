@@ -31,7 +31,7 @@
           {% if user.is_authenticated %}
             <img id="profImage" src="{{user.profile.image.url}}" class="rounded-circle border" style="width: 40px; height: 40px;">
           {% endif %}
-          <a class="navbar-brand mr-4 ml-2" href="{% url 'process-cases' %}" style="color: #fff;"><strong>ID</strong> Cases</a>
+          <a class="navbar-brand mr-4 ml-2" href="{% url 'process-cases' %}" style="color: #fff;"><strong>ID</strong> Customer Cases</a>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -39,7 +39,7 @@
             <div class="navbar-nav mr-auto">
               <a class="nav-item nav-link" href="{% url 'training-dashboard' %}" style="color: #fff;">Training</a>
               <a class="nav-item nav-link" href="{% url 'training-kpis' %}" style="color: #fff;">KPI</a>
-              <a class="nav-item nav-link" href="{% url 'process-cases' %}" style="color: #fff;">Cases</a>
+              <a class="nav-item nav-link" href="{% url 'process-cases' %}" style="color: #fff;">Customer Cases</a>
               <!-- <a class="nav-item nav-link" href="{% url 'tasks-home' %}">Tasks</a> -->
             </div>
             <!-- Navbar Right Side -->

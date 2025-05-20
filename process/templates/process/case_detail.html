@@ -12,9 +12,12 @@
     </div>
     <div class="row">
         <div class="col-md-8">
+            <!-- add a badge to show the status -->
+            <span class="mb-4 badge" style="border: 1px solid #007bff; background-color: #e9f5ff; color: #007bff;">
+                {{ case.status|upper }}
+            </span>
             <p>{{ case.description }}</p>
             <p>Created At: {{ case.created_at }}</p>
-            <p>Status: {{ case.status }}</p>
             <p>Assigned To: {{ case.assigned_to }}</p>
         </div>
         <div class="col-md-4 d-flex flex-column align-items-end justify-content-start">
@@ -49,6 +52,17 @@
                 {% for complaint in complaints %}
                     <div class="card mb-3">
                         <div class="card-body">
+                            <!-- add a badge to show the status -->
+                            <span class="mb-4 badge" style="border: 1px solid #007bff; background-color: #e9f5ff; color: #007bff;">
+                                {{ complaint.status|upper }}
+                            </span>
+                            {% if complaint.status == "open" %}
+                                <a href="{% url 'process-complaint-edit' case.id complaint.id %}"  class="btn btn-success btn-sm float-right mb-2"
+                                        onclick="return confirm('Have you submitted the customer complaint for to quality?');">
+                                    Submit Form to Quality
+                                </a>
+                                
+                            {% endif %}
                             <div class="d-flex align-items-center mb-2">
                                 <h5 class="mb-0 mr-2">Complaint #{{ complaint.number }}</h5>
                                 <small>
@@ -57,8 +71,6 @@
                             </div>
                             <p class="card-text">Description: {{ complaint.description }}</p>
                             <p class="card-text">Created At: {{ complaint.created_at }}</p>
-                            <p class="card-text">Status: {{ complaint.status }}</p>
-                            
                             
                         </div>
                     </div>
@@ -74,6 +86,10 @@
                 {% for return_item in returns %}
                     <div class="card mb-3">
                         <div class="card-body">
+                            <!-- add a badge to show the status -->
+                            <span class="mb-4 badge" style="border: 1px solid #007bff; background-color: #e9f5ff; color: #007bff;">
+                                {{ return_item.status|upper }}
+                            </span>
                             <div class="d-flex align-items-center mb-2">
                                 <h5 class="mb-0 mr-2">Return #{{ return_item.number }}</h5>
                                 <small>
@@ -82,7 +98,6 @@
                             </div>
                             <p class="card-text">Description: {{ return_item.description }}</p>
                             <p class="card-text">Created At: {{ return_item.created_at }}</p>
-                            <p class="card-text">Status: {{ return_item.status }}</p>
                         </div>
                     </div>
                 {% endfor %}
@@ -97,6 +112,10 @@
                 {% for credit in credits %}
                     <div class="card mb-3">
                         <div class="card-body">
+                            <!-- add a badge to show the status -->
+                            <span class="mb-4 badge" style="border: 1px solid #007bff; background-color: #e9f5ff; color: #007bff;">
+                                {{ credit.status|upper }}
+                            </span>
                             <div class="d-flex align-items-center mb-2">
                                 <h5 class="mb-0 mr-2">Credit #{{ credit.number }}</h5>
                                 <small>
@@ -105,7 +124,6 @@
                             </div>
                             <p class="card-text">Description: {{ credit.description }}</p>
                             <p class="card-text">Created At: {{ credit.created_at }}</p>
-                            <p class="card-text">Status: {{ credit.status }}</p>
                         </div>
                     </div>
                 {% endfor %}

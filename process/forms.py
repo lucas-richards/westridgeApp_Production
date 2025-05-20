@@ -1,14 +1,20 @@
 from django import forms
-from .models import Case, CustomerComplaint, Return, Credit
+from .models import Case, CustomerComplaint, Return, Credit, Category
+from .models import Category
 
 class CaseForm(forms.ModelForm):
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        widget=forms.Select(),
+        label='Category'
+    )
+
     class Meta:
         model = Case
         fields = ['description', 'status', 'category', 'is_complaint', 'is_return', 'is_credit']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
             'status': forms.Select(),
-            'category': forms.TextInput(attrs={'placeholder': 'Enter category'}),
         }
         labels = {
             'description': 'Case Description',
@@ -19,8 +25,9 @@ class CaseForm(forms.ModelForm):
 class CustomerComplaintForm(forms.ModelForm):
     class Meta:
         model = CustomerComplaint
-        fields = ['case','number', 'issue', 'resolution']
+        fields = ['case','number','status', 'issue', 'resolution']
         widgets = {
+            'number': forms.TextInput(attrs={'placeholder': 'This number is provided by quality once it is submitted'}),
             'issue': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
             'resolution': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
         }
@@ -33,7 +40,7 @@ class CustomerComplaintForm(forms.ModelForm):
 class ReturnForm(forms.ModelForm):
     class Meta:
         model = Return
-        fields = ['case','number','authorized', 'reason', 'item_condition']
+        fields = ['case','number','status','authorized', 'reason', 'item_condition']
         widgets = {
             'reason': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
             'item_condition': forms.TextInput(attrs={'placeholder': 'Enter item condition'}),
@@ -47,7 +54,7 @@ class ReturnForm(forms.ModelForm):
 class CreditForm(forms.ModelForm):
     class Meta:
         model = Credit
-        fields = ['case', 'number','amount', 'credit_reason']
+        fields = ['case', 'number','status','amount', 'credit_reason']
         widgets = {
             'amount': forms.NumberInput(attrs={'placeholder': 'Enter amount'}),
             'credit_reason': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
