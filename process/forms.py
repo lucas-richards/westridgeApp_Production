@@ -38,7 +38,6 @@ class ReturnForm(forms.ModelForm):
         fields = [
             'case',
             'number',
-            'status',
             'authorized',
             'reason',
             'item_condition',

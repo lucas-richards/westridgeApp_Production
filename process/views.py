@@ -12,6 +12,36 @@ from django import forms
 from django.urls import reverse
 
 # Create your views here.
+def dashboard(request):
+    cases_qs = Case.objects.all().order_by('-id')
+    open_cases_count = cases_qs.filter(status='open').count()
+    closed_cases_count = cases_qs.filter(status='closed').count()
+    total_complaints = cases_qs.filter(is_complaint=True).count()
+    open_complaints = cases_qs.filter(is_complaint=True, status='open').count()
+    total_returns = cases_qs.filter(is_return=True).count()
+    open_returns = cases_qs.filter(is_return=True, status='open').count()
+    total_credits = cases_qs.filter(is_credit=True).count()
+    open_credits = cases_qs.filter(is_credit=True, status='open').count()
+    total_scraps = cases_qs.filter(is_scrap=True).count()
+    open_scraps = cases_qs.filter(is_scrap=True, status='open').count()
+    
+    context = {
+        'title': 'Dashboard',
+        'cases': cases_qs,
+        'open_cases_count': open_cases_count,
+        'closed_cases_count': closed_cases_count,
+        'total_complaints': total_complaints,
+        'open_complaints': open_complaints,
+        'total_returns': total_returns,
+        'open_returns': open_returns,
+        'total_credits': total_credits,
+        'open_credits': open_credits,
+        'total_scraps': total_scraps,
+        'open_scraps': open_scraps,
+    }
+    
+    return render(request, 'process/dashboard.html', context)
+
 def cases(request):
     cases_qs = Case.objects.all().order_by('-id')
     open_cases_count = cases_qs.filter(status='open').count()
@@ -45,17 +75,26 @@ def cases(request):
 
 def case_detail(request, case_id):
     case = Case.objects.get(id=case_id)
-    complaints = case.complaints.all()
-    returns = case.returns.all()
-    credit = case.credits.all()
     context = {
         'title': 'Case Detail',
         'case': case,
-        'complaints': complaints,
-        'returns': returns,
-        'credits': credit,
+        'complaints': case.complaints.all(),
+        'returns': case.returns.all(),
+        'credits': case.credits.all(),
+        'scraps': case.scraps.all(),
     }
     return render(request, 'process/case_detail.html', context)
+
+def case_update_status(request, case_id):
+    case = Case.objects.get(id=case_id)
+    if case.status.lower() == 'open':
+        case.status = 'closed'
+    else:
+        case.status = 'open'
+    print(case.status)
+    case.save()
+    messages.success(request, 'Case status updated successfully!')
+    return redirect('process-case-detail', case_id=case.id)
 
 def case_edit(request, case_id):
     case = Case.objects.get(id=case_id)

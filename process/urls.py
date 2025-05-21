@@ -3,8 +3,10 @@ from . import views
 
 urlpatterns = [
     path('', views.cases, name='process-cases'),
+    path('dashboard/', views.dashboard, name='process-dashboard'),
     path('cases/new/', views.case_new, name='process-case-new'),
     path('cases/edit/<int:case_id>/', views.case_edit, name='process-case-edit'),
+    path('cases/updatestatus/<int:case_id>/', views.case_update_status, name='process-case-update-status'),
     path('cases/<int:case_id>/', views.case_detail, name='process-case-detail'),
     path('cases/<int:case_id>/delete/', views.case_delete, name='process-case-delete'),
     # new customer complain for the case

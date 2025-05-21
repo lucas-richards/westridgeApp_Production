@@ -8,6 +8,9 @@
 
   <ul class="nav nav-tabs mb-3">
       <li class="nav-item">
+        <a class="nav-link {% if title == 'Dashboard' %}active{% endif %}" href="{% url 'process-dashboard' %}">Dashboard</a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link {% if title == 'Cases' %}active{% endif %}" href="{% url 'process-cases' %}">Cases</a>
       </li>
       

@@ -13,14 +13,29 @@
     <div class="row">
         <div class="col-md-8">
             <!-- add a badge to show the status -->
-            <span class="mb-4 badge" style="border: 1px solid #007bff; background-color: #e9f5ff; color: #007bff;">
-                {{ case.status|upper }}
-            </span>
+            {% if case.status == "closed" %}
+                <span class="mb-4 badge" style="border: 1px solid #6c757d; background-color: #f2f2f2; color: #6c757d;">
+                    {{ case.status|upper }}
+                </span>
+            {% else %}
+                <span class="mb-4 badge" style="border: 1px solid #007bff; background-color: #e9f5ff; color: #007bff;">
+                    {{ case.status|upper }}
+                </span>
+            {% endif %}
             <p>{{ case.description }}</p>
             <p>Created At: {{ case.created_at }}</p>
             <p>Assigned To: {{ case.assigned_to }}</p>
         </div>
         <div class="col-md-4 d-flex flex-column align-items-end justify-content-start">
+            {% if case.status == "closed" %}
+                <a href="{% url 'process-case-update-status' case.id %}" class="btn btn-sm btn-secondary mb-2" style="min-width: 200px;">
+                    Reopen Case
+                </a>
+            {% else %}
+                <a href="{% url 'process-case-update-status' case.id %}" class="btn btn-sm btn-secondary mb-2" style="min-width: 200px;">
+                    Close Case
+                </a>
+            {% endif %}
             {% if case.is_complaint %}
             <a href="{% url 'process-customer-complaint-new' case.id %}" class="btn btn-sm btn-primary mb-2 text-center" style="min-width: 200px;">
                 <span class="mr-1">+</span> Customer Complaint
