@@ -86,3 +86,14 @@ class Credit(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     credit_reason = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+class Scrap(models.Model):
+    case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='scraps')
+    STATUS_SCRAP_CHOICES = [
+        ('open', 'Open'),
+        ('closed', 'Closed'),
+    ]
+    status = models.CharField(max_length=100, choices=STATUS_SCRAP_CHOICES, default='open')
+    number = models.CharField(max_length=100, blank=True, null=True)
+    reason = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)

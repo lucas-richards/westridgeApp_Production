@@ -1,5 +1,5 @@
 from django import forms
-from .models import Case, CustomerComplaint, Return, Credit, Category
+from .models import Case, CustomerComplaint, Return, Credit, Category, Scrap
 from .models import Category
 
 class CaseForm(forms.ModelForm):
@@ -95,6 +95,18 @@ class CreditForm(forms.ModelForm):
             'case': 'Related Case',
             'amount': 'Credit Amount',
             'credit_reason': 'Credit Reason',
+        }
+
+class ScrapForm(forms.ModelForm):
+    class Meta:
+        model = Scrap
+        fields = ['case', 'number','status','reason']
+        widgets = {
+            'reason': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
+        }
+        labels = {
+            'case': 'Related Case',
+            'reason': 'Scrap Reason',
         }
 
 

@@ -19,5 +19,9 @@ urlpatterns = [
     path('cases/<int:case_id>/credit/new/', views.credit_new, name='process-credit-new'),
     path('cases/<int:case_id>/credit/edit/<int:credit_id>/', views.credit_edit, name='process-credit-edit'),
     path('cases/<int:case_id>/credit/delete/<int:credit_id>/', views.credit_delete, name='process-credit-delete'),
+    # new process scrap
+    path('cases/<int:case_id>/scrap/new/', views.scrap_new, name='process-scrap-new'),
+    path('cases/<int:case_id>/scrap/edit/<int:scrap_id>/', views.scrap_edit, name='process-scrap-edit'),
+    path('cases/<int:case_id>/scrap/delete/<int:scrap_id>/', views.scrap_delete, name='process-scrap-delete'),
 
 ]

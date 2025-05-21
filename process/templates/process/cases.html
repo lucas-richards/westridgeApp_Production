@@ -22,7 +22,7 @@
     <div class="container mt-3">
         <div class="row flex-container">
             <div>
-                <p>Cases: {{ cases_count }}</p>
+                <p>Open Cases: {{ cases_count }}</p>
             </div>
             <div>
                 <a href="{% url 'process-case-new' %}" class="btn btn-primary">Open Case</a>
@@ -64,7 +64,6 @@
         },
         { headerName: "Status", field: "status", width: 100, sortable: true, filter: true, editable: false },
         { headerName: "Title", field: "title",  sortable: true, filter: true, editable: false },
-        { headerName:"Category", field: "category", sortable: true, filter: true, editable: false },
         { headerName: "Created At", field: "created_at", sortable: true, filter: true, editable: false,
           valueFormatter: function(params) {
              if (!params.value) return '';
@@ -79,76 +78,99 @@
         },
         {
             headerName: "Customer Complaint",
-            field: "complaints_count",
+            field: "complaint_number",
             sortable: true,
             filter: true,
             editable: false,
             valueGetter: function(params) {
-                // If complaints_count is 0 and is_complaint is true, show "Missing"
-                if (
-                    (params.data.complaints_count === 0 || params.data.complaints_count === "0") &&
-                    params.data.is_complaint === true
-                ) {
-                    return "Missing";
-                }
-                // If complaints_count is 0 and is_complaint is not true, show "N/A"
-                if (
-                    (params.data.complaints_count === 0 || params.data.complaints_count === "0") &&
-                    params.data.is_complaint !== true
-                ) {
-                    return "N/A";
-                }
-                return params.data.complaints_count;
+            // If complaint_number is null/empty/0 and is_complaint is true, show "Missing"
+            if (
+                (!params.data.complaint_number || params.data.complaint_number === 0 || params.data.complaint_number === "0") &&
+                params.data.is_complaint === true
+            ) {
+                return "Missing";
+            }
+            // If complaint_number is null/empty/0 and is_complaint is not true, show "N/A"
+            if (
+                (!params.data.complaint_number || params.data.complaint_number === 0 || params.data.complaint_number === "0") &&
+                params.data.is_complaint !== true
+            ) {
+                return "N/A";
+            }
+            return params.data.complaint_number;
             }
         },
         {
             headerName: "Return",
-            field: "returns_count",
+            field: "return_number",
             sortable: true,
             filter: true,
             editable: false,
             valueGetter: function(params) {
-            // If returns_count is 0 and is_return is true, show "Missing"
+            // If return_number is null/empty/0 and is_return is true, show "Missing"
             if (
-                (params.data.returns_count === 0 || params.data.returns_count === "0") &&
+                (!params.data.return_number || params.data.return_number === 0 || params.data.return_number === "0") &&
                 params.data.is_return === true
             ) {
                 return "Missing";
             }
-            // If returns_count is 0 and is_return is not true, show "N/A"
+            // If return_number is null/empty/0 and is_return is not true, show "N/A"
             if (
-                (params.data.returns_count === 0 || params.data.returns_count === "0") &&
+                (!params.data.return_number || params.data.return_number === 0 || params.data.return_number === "0") &&
                 params.data.is_return !== true
             ) {
                 return "N/A";
             }
-            return params.data.returns_count;
+            return params.data.return_number;
             }
         },
         {
             headerName: "Credit",
-            field: "credits_count",
+            field: "credit_number",
             sortable: true,
             filter: true,
             editable: false,
             valueGetter: function(params) {
-            // If credits_count is 0 and is_credit is true, show "Missing"
+            // If credit_number is null/empty/0 and is_credit is true, show "Missing"
             if (
-                (params.data.credits_count === 0 || params.data.credits_count === "0") &&
+                (!params.data.credit_number || params.data.credit_number === 0 || params.data.credit_number === "0") &&
                 params.data.is_credit === true
             ) {
                 return "Missing";
             }
-            // If credits_count is 0 and is_credit is not true, show "N/A"
+            // If credit_number is null/empty/0 and is_credit is not true, show "N/A"
             if (
-                (params.data.credits_count === 0 || params.data.credits_count === "0") &&
+                (!params.data.credit_number || params.data.credit_number === 0 || params.data.credit_number === "0") &&
                 params.data.is_credit !== true
             ) {
                 return "N/A";
             }
-            return params.data.credits_count;
+            return params.data.credit_number;
             }
-        
+        },
+        {
+            headerName: "Scrap",
+            field: "scrap_number",
+            sortable: true,
+            filter: true,
+            editable: false,
+            valueGetter: function(params) {
+                // If scrap_number is null/empty/0 and is_scrap is true, show "Missing"
+                if (
+                    (!params.data.scrap_number || params.data.scrap_number === 0 || params.data.scrap_number === "0") &&
+                    params.data.is_scrap === true
+                ) {
+                    return "Missing";
+                }
+                // If scrap_number is null/empty/0 and is_scrap is not true, show "N/A"
+                if (
+                    (!params.data.scrap_number || params.data.scrap_number === 0 || params.data.scrap_number === "0") &&
+                    params.data.is_scrap !== true
+                ) {
+                    return "N/A";
+                }
+                return params.data.scrap_number;
+            }
         },
             
            

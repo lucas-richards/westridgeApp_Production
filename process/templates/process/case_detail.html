@@ -21,15 +21,26 @@
             <p>Assigned To: {{ case.assigned_to }}</p>
         </div>
         <div class="col-md-4 d-flex flex-column align-items-end justify-content-start">
+            {% if case.is_complaint %}
             <a href="{% url 'process-customer-complaint-new' case.id %}" class="btn btn-sm btn-primary mb-2 text-center" style="min-width: 200px;">
                 <span class="mr-1">+</span> Customer Complaint
             </a>
+            {% endif %}
+            {% if case.is_return %}
             <a href="{% url 'process-return-new' case.id %}" class="btn btn-sm btn-primary mb-2 text-center" style="min-width: 200px;">
                 <span class="mr-1">+</span> Return
             </a>
+            {% endif %}
+            {% if case.is_credit %}
             <a href="{% url 'process-credit-new' case.id %}" class="btn btn-sm btn-primary text-center" style="min-width: 200px;">
                 <span class="mr-1">+</span> Credit
             </a>
+            {% endif %}
+            {% if case.is_scrap %}
+            <a href="{% url 'process-scrap-new' case.id %}" class="btn btn-sm btn-primary text-center mt-2" style="min-width: 200px;">
+                <span class="mr-1">+</span> Scrap
+            </a>
+            {% endif %}
             
         </div>
     </div>
@@ -43,10 +54,14 @@
     {% if case.is_credit %}
         <span class="badge badge-secondary">Credit</span>
     {% endif %}
+    {% if case.is_scrap %}
+        <span class="badge badge-secondary">Scrap</span>
+    {% endif %}
     <hr>
     <div class="row">
         <!-- Customer Complaints Column -->
-        <div class="col-md-4">
+        {% if case.is_complaint %}
+        <div class="col-md-3">
             <h3>Customer Complaints</h3>
             {% if complaints %}
                 {% for complaint in complaints %}
@@ -61,7 +76,6 @@
                                         onclick="return confirm('Have you submitted the customer complaint for to quality?');">
                                     Submit Form to Quality
                                 </a>
-                                
                             {% endif %}
                             <div class="d-flex align-items-center mb-2">
                                 <h5 class="mb-0 mr-2">Complaint #{{ complaint.number }}</h5>
@@ -71,7 +85,6 @@
                             </div>
                             <p class="card-text">Description: {{ complaint.description }}</p>
                             <p class="card-text">Created At: {{ complaint.created_at }}</p>
-                            
                         </div>
                     </div>
                 {% endfor %}
@@ -79,8 +92,10 @@
                 <p>No customer complaints found for this case.</p>
             {% endif %}
         </div>
+        {% endif %}
         <!-- Returns Column -->
-        <div class="col-md-4">
+         {% if case.is_return %}
+        <div class="col-md-3">
             <h3>Returns</h3>
             {% if returns %}
                 {% for return_item in returns %}
@@ -105,8 +120,10 @@
                 <p>No returns found for this case.</p>
             {% endif %}
         </div>
+        {% endif %}
         <!-- Credits Column -->
-        <div class="col-md-4">
+         {% if case.is_credit %}
+        <div class="col-md-3">
             <h3>Credits</h3>
             {% if credits %}
                 {% for credit in credits %}
@@ -131,6 +148,35 @@
                 <p>No credits found for this case.</p>
             {% endif %}
         </div>
+        {% endif %}
+        <!-- Scrap Column -->
+         {% if case.is_scrap %}
+        <div class="col-md-3">
+            <h3>Scrap</h3>
+            {% if scraps %}
+            {% for scrap in scraps %}
+                <div class="card mb-3">
+                <div class="card-body">
+                    <!-- add a badge to show the status -->
+                    <span class="mb-4 badge" style="border: 1px solid #007bff; background-color: #e9f5ff; color: #007bff;">
+                    {{ scrap.status|upper }}
+                    </span>
+                    <div class="d-flex align-items-center mb-2">
+                    <h5 class="mb-0 mr-2">Scrap #{{ scrap.number }}</h5>
+                    <small>
+                        <a href="{% url 'process-scrap-edit' case.id scrap.id %}">Edit</a>
+                    </small>
+                    </div>
+                    <p class="card-text">Description: {{ scrap.description }}</p>
+                    <p class="card-text">Created At: {{ scrap.created_at }}</p>
+                </div>
+                </div>
+            {% endfor %}
+            {% else %}
+            <p>No scrap records found for this case.</p>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
     <hr>
     <!--  a delete case button on the bottom of the screen to the left -->

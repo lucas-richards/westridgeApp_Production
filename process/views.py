@@ -4,7 +4,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.safestring import mark_safe
-from .forms import CaseForm, CustomerComplaintForm, ReturnForm, CreditForm
+from .forms import CaseForm, CustomerComplaintForm, ReturnForm, CreditForm, ScrapForm
 from django.http import HttpResponse
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -14,6 +14,7 @@ from django.urls import reverse
 # Create your views here.
 def cases(request):
     cases_qs = Case.objects.all().order_by('-id')
+    open_cases_count = cases_qs.filter(status='open').count()
     
     row_data = [
         {
@@ -24,10 +25,11 @@ def cases(request):
             'is_complaint': case.is_complaint,
             'is_return': case.is_return,
             'is_credit': case.is_credit,
-            'complaints_count': case.complaints.count(),
-            'returns_count': case.returns.count(),
-            'credits_count': case.credits.count(),
-
+            'is_scrap': case.is_scrap,
+            'complaint_number': case.complaints.first().number if case.complaints.exists() and case.complaints.first().number else None,
+            'return_number': case.returns.first().number if case.returns.exists() and case.returns.first().number else None,
+            'credit_number': case.credits.first().number if case.credits.exists() and case.credits.first().number else None,
+            'scrap_number': case.scraps.first().number if case.scraps.exists() and case.scraps.first().number else None,
         }
         for case in cases_qs
     ]
@@ -36,7 +38,7 @@ def cases(request):
         'title': 'Cases',
         'cases': cases_qs,
         'rowData': mark_safe(json.dumps(row_data)),
-        'cases_count': cases_qs.count(),
+        'cases_count': open_cases_count,
     }
 
     return render(request, 'process/cases.html', context)
@@ -195,4 +197,39 @@ def credit_delete(request, case_id, credit_id):
     messages.success(request, 'Credit deleted successfully!')
     return redirect('process-case-detail', case_id=case.id)
 
+def scrap_new(request, case_id):
+    case = Case.objects.get(id=case_id)
+    if request.method == 'POST':
+        form = ScrapForm(request.POST)
+        if form.is_valid():
+            scrap = form.save(commit=False)
+            scrap.case = case
+            scrap.save()
+            messages.success(request, 'Scrap created successfully!')
+            return redirect('process-case-detail', case_id=case.id)
+    else:
+        form = ScrapForm()
+        form.fields['case'].initial = case.id
+        form.fields['case'].widget = forms.HiddenInput()
+    return render(request, 'process/scrap_new.html', {'form': form, 'case': case})
 
+def scrap_edit(request, case_id, scrap_id):
+    case = Case.objects.get(id=case_id)
+    scrap = case.scraps.get(id=scrap_id)
+    if request.method == 'POST':
+        form = ScrapForm(request.POST, instance=scrap)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Scrap updated successfully!')
+            return redirect('process-case-detail', case_id=case.id)
+    else:
+        form = ScrapForm(instance=scrap)
+        form.fields['case'].widget = forms.HiddenInput()
+    return render(request, 'process/scrap_new.html', {'form': form, 'case': case, 'scrap': scrap})
+
+def scrap_delete(request, case_id, scrap_id):
+    case = Case.objects.get(id=case_id)
+    scrap = case.scraps.get(id=scrap_id)
+    scrap.delete()
+    messages.success(request, 'Scrap deleted successfully!')
+    return redirect('process-case-detail', case_id=case.id)
