@@ -11,7 +11,7 @@
         </small>
     </div>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-4">
             <!-- add a badge to show the status -->
             {% if case.status == "closed" %}
                 <span class="mb-4 badge" style="border: 1px solid #6c757d; background-color: #f2f2f2; color: #6c757d;">
@@ -24,7 +24,34 @@
             {% endif %}
             <p>{{ case.description }}</p>
             <p>Created At: {{ case.created_at }}</p>
-            <p>Assigned To: {{ case.assigned_to }}</p>
+             <!-- add something nice to show if it's a complaint is_complaint, is_return and is_credit they are booleans -->
+            {% if case.is_complaint %}
+                <span class="badge badge-secondary mr-1">Complaint</span>
+            {% endif %}
+            {% if case.is_return %}
+                <span class="badge badge-secondary mr-1">Return</span>
+            {% endif %}
+            {% if case.is_credit %}
+                <span class="badge badge-secondary">Credit</span>
+            {% endif %}
+            {% if case.is_scrap %}
+                <span class="badge badge-secondary">Scrap</span>
+            {% endif %}
+            
+        </div>
+        <div class="col-md-4">
+            <!-- Show up to three casefiles as images -->
+            <div class="d-flex mb-3">
+                {% if case.image1 %}
+                    <img src="{{ case.image1.url }}" alt="Image 1" class="img-thumbnail mr-2" style="width: 150px; height: 150px; object-fit: cover;" loading="lazy">
+                {% endif %}
+                {% if case.image2 %}
+                    <img src="{{ case.image2.url }}" alt="Image 2" class="img-thumbnail mr-2" style="width: 150px; height: 150px; object-fit: cover;" loading="lazy">
+                {% endif %}
+                {% if case.image3 %}
+                    <img src="{{ case.image3.url }}" alt="Image 3" class="img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;" loading="lazy">
+                {% endif %}
+            </div>
         </div>
         <div class="col-md-4 d-flex flex-column align-items-end justify-content-start">
             {% if case.status == "closed" %}
@@ -47,61 +74,42 @@
             </a>
             {% endif %}
             {% if case.is_credit %}
-            <a href="{% url 'process-credit-new' case.id %}" class="btn btn-sm btn-primary text-center" style="min-width: 200px;">
+            <a href="{% url 'process-credit-new' case.id %}" class="btn btn-sm btn-primary mb-2 text-center" style="min-width: 200px;">
                 <span class="mr-1">+</span> Credit
             </a>
             {% endif %}
             {% if case.is_scrap %}
-            <a href="{% url 'process-scrap-new' case.id %}" class="btn btn-sm btn-primary text-center mt-2" style="min-width: 200px;">
+            <a href="{% url 'process-scrap-new' case.id %}" class="btn btn-sm btn-primary text-center" style="min-width: 200px;">
                 <span class="mr-1">+</span> Scrap
             </a>
             {% endif %}
-            
         </div>
     </div>
-    <!-- add something nice to show if it's a complaint is_complaint, is_return and is_credit they are booleans -->
-    {% if case.is_complaint %}
-        <span class="badge badge-secondary mr-1">Complaint</span>
-    {% endif %}
-    {% if case.is_return %}
-        <span class="badge badge-secondary mr-1">Return</span>
-    {% endif %}
-    {% if case.is_credit %}
-        <span class="badge badge-secondary">Credit</span>
-    {% endif %}
-    {% if case.is_scrap %}
-        <span class="badge badge-secondary">Scrap</span>
-    {% endif %}
+   
     <hr>
     <div class="row">
         <!-- Customer Complaints Column -->
         {% if case.is_complaint %}
         <div class="col-md-3">
-            <h3>Customer Complaints</h3>
+            <h3>Complaints</h3>
             {% if complaints %}
                 {% for complaint in complaints %}
+                <a class="text-dark text-decoration-none" href="{% url 'process-complaint-edit' case.id complaint.id %}">
                     <div class="card mb-3">
                         <div class="card-body">
                             <!-- add a badge to show the status -->
                             <span class="mb-4 badge" style="border: 1px solid #007bff; background-color: #e9f5ff; color: #007bff;">
                                 {{ complaint.status|upper }}
                             </span>
-                            {% if complaint.status == "open" %}
-                                <a href="{% url 'process-complaint-edit' case.id complaint.id %}"  class="btn btn-success btn-sm float-right mb-2"
-                                        onclick="return confirm('Have you submitted the customer complaint for to quality?');">
-                                    Submit Form to Quality
-                                </a>
-                            {% endif %}
+                            
                             <div class="d-flex align-items-center mb-2">
-                                <h5 class="mb-0 mr-2">Complaint #{{ complaint.number }}</h5>
-                                <small>
-                                    <a href="{% url 'process-complaint-edit' case.id complaint.id %}">Edit</a>
-                                </small>
+                                <h5 class="mb-0 mr-2">#{{ complaint.number }}</h5>
                             </div>
                             <p class="card-text">Description: {{ complaint.description }}</p>
                             <p class="card-text">Created At: {{ complaint.created_at }}</p>
                         </div>
                     </div>
+                </a>
                 {% endfor %}
             {% else %}
                 <p>No customer complaints found for this case.</p>
@@ -114,6 +122,7 @@
             <h3>Returns</h3>
             {% if returns %}
                 {% for return_item in returns %}
+                <a class="text-dark text-decoration-none" href="{% url 'process-return-edit' case.id return_item.id %}">
                     <div class="card mb-3">
                         <div class="card-body">
                             <!-- add a badge to show the status -->
@@ -121,15 +130,13 @@
                                 {{ return_item.status|upper }}
                             </span>
                             <div class="d-flex align-items-center mb-2">
-                                <h5 class="mb-0 mr-2">Return #{{ return_item.number }}</h5>
-                                <small>
-                                    <a href="{% url 'process-return-edit' case.id return_item.id %}">Edit</a>
-                                </small>
+                                <h5 class="mb-0 mr-2">#{{ return_item.number }}</h5>
                             </div>
                             <p class="card-text">Description: {{ return_item.description }}</p>
                             <p class="card-text">Created At: {{ return_item.created_at }}</p>
                         </div>
                     </div>
+                </a>
                 {% endfor %}
             {% else %}
                 <p>No returns found for this case.</p>
@@ -142,6 +149,7 @@
             <h3>Credits</h3>
             {% if credits %}
                 {% for credit in credits %}
+                <a class="text-dark text-decoration-none" href="{% url 'process-credit-edit' case.id credit.id %}">
                     <div class="card mb-3">
                         <div class="card-body">
                             <!-- add a badge to show the status -->
@@ -149,15 +157,13 @@
                                 {{ credit.status|upper }}
                             </span>
                             <div class="d-flex align-items-center mb-2">
-                                <h5 class="mb-0 mr-2">Credit #{{ credit.number }}</h5>
-                                <small>
-                                    <a href="{% url 'process-credit-edit' case.id credit.id %}">Edit</a>
-                                </small>
+                                <h5 class="mb-0 mr-2">#{{ credit.number }}</h5>
                             </div>
                             <p class="card-text">Description: {{ credit.description }}</p>
                             <p class="card-text">Created At: {{ credit.created_at }}</p>
                         </div>
                     </div>
+                </a>
                 {% endfor %}
             {% else %}
                 <p>No credits found for this case.</p>
@@ -170,6 +176,7 @@
             <h3>Scrap</h3>
             {% if scraps %}
             {% for scrap in scraps %}
+            <a class="text-dark text-decoration-none" href="{% url 'process-scrap-edit' case.id scrap.id %}">
                 <div class="card mb-3">
                 <div class="card-body">
                     <!-- add a badge to show the status -->
@@ -177,15 +184,13 @@
                     {{ scrap.status|upper }}
                     </span>
                     <div class="d-flex align-items-center mb-2">
-                    <h5 class="mb-0 mr-2">Scrap #{{ scrap.number }}</h5>
-                    <small>
-                        <a href="{% url 'process-scrap-edit' case.id scrap.id %}">Edit</a>
-                    </small>
+                        <h5 class="mb-0 mr-2">#{{ scrap.number }}</h5>
                     </div>
                     <p class="card-text">Description: {{ scrap.description }}</p>
                     <p class="card-text">Created At: {{ scrap.created_at }}</p>
                 </div>
-                </div>
+            </div>
+            </a>
             {% endfor %}
             {% else %}
             <p>No scrap records found for this case.</p>

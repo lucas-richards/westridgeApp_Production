@@ -1,4 +1,13 @@
 from django.db import models
+from django.utils import timezone
+from django.core.files.storage import FileSystemStorage
+from django.core.files import File
+from django.core.files.base import ContentFile
+from django.core.files.images import get_image_dimensions
+from django.core.exceptions import ValidationError
+from PIL import Image
+import io
+
 
 # Create your models here.
 class Case(models.Model):
@@ -15,9 +24,35 @@ class Case(models.Model):
     is_return = models.BooleanField(default=True)
     is_credit = models.BooleanField(default=True)
     is_scrap = models.BooleanField(default=True)
+    # add three files or images
+    image1 = models.ImageField(upload_to='cases/', blank=True, null=True)
+    image2 = models.ImageField(upload_to='cases/', blank=True, null=True)
+    image3 = models.ImageField(upload_to='cases/', blank=True, null=True)
+
 
     def __str__(self):
         return f"Case #{self.id}"
+
+    def clean(self):
+        super().clean()
+        if not self.is_complaint and not self.is_return and not self.is_credit and not self.is_scrap:
+            raise ValidationError("At least one of the complaint, return, credit, or scrap must be selected.")
+
+        # resize image to low quality
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        for image_field in ['image1', 'image2', 'image3']:
+            image = getattr(self, image_field)
+            if image and hasattr(image, 'path'):
+                try:
+                    img = Image.open(image.path)
+                    if img.height > 300 or img.width > 300:
+                        output_size = (300, 300)
+                        img.thumbnail(output_size)
+                        img.save(image.path)
+                except Exception:
+                    pass
 
 class Category(models.Model):
     code = models.CharField(max_length=100)
@@ -31,19 +66,37 @@ class CustomerComplaint(models.Model):
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='complaints')
     STATUS_COMPLAINT_CHOICES = [
         ('open', 'Open'),
-        ('quality', 'Quality'),
-        ('customer_service', 'Customer Service'),
-        ('sales', 'Sales'),
-        ('warehouse', 'Warehouse'),
-        ('production', 'Production'),
+        ('request_submitted', 'Request Submitted'),
+        ('path_assigned', 'Path Assigned'),
+        ('investigation_in_progress', 'Investigation In Progress'),
+        ('resolution', 'Resolution'),
         ('closed', 'Closed'),
     ]
     status = models.CharField(max_length=100, choices=STATUS_COMPLAINT_CHOICES, default='open')
-    category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, blank=True, related_name='cases')
+    sku = models.CharField(max_length=100, blank=True, null=True)
+    lot_number = models.CharField(max_length=100, blank=True, null=True)
+    classification = models.CharField(max_length=100, choices=[
+        ('shipping', 'Shipping'),
+        ('contamination', 'Contamination'),
+        ('irritation', 'Irritation'),
+        ('leaking', 'Leaking'),
+        ('package_issue', 'Package Issue'),
+        ('efficacy', 'Efficacy'),
+        ('expired', 'Expired'),
+        ('cloudy', 'Cloudy'),
+        ('other', 'Other'),
+    ], default='other')
     number = models.CharField(max_length=100, blank=True, null=True)
+    # time stamp quality received
+    request_submitted_at = models.DateTimeField(blank=True, null=True)
+    path_assigned_at = models.DateTimeField(blank=True, null=True)
+    investigation_in_progress_at = models.DateTimeField(blank=True, null=True)
+    resolution_at = models.DateTimeField(blank=True, null=True)
+    closed_at = models.DateTimeField(blank=True, null=True)
+    
     issue = models.TextField()
     resolution = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now, editable=False)
 
 class Return(models.Model):
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='returns')

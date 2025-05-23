@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Case
+from .models import Case, CustomerComplaint, Return, Credit, Scrap
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -10,20 +10,25 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django import forms
 from django.urls import reverse
+from django.utils import timezone
 
 # Create your views here.
 def dashboard(request):
     cases_qs = Case.objects.all().order_by('-id')
     open_cases_count = cases_qs.filter(status='open').count()
     closed_cases_count = cases_qs.filter(status='closed').count()
-    total_complaints = cases_qs.filter(is_complaint=True).count()
-    open_complaints = cases_qs.filter(is_complaint=True, status='open').count()
-    total_returns = cases_qs.filter(is_return=True).count()
-    open_returns = cases_qs.filter(is_return=True, status='open').count()
-    total_credits = cases_qs.filter(is_credit=True).count()
-    open_credits = cases_qs.filter(is_credit=True, status='open').count()
-    total_scraps = cases_qs.filter(is_scrap=True).count()
-    open_scraps = cases_qs.filter(is_scrap=True, status='open').count()
+    complaints_qs = CustomerComplaint.objects.all()
+    open_complaints = complaints_qs.filter(status='open').count()
+    total_complaints = complaints_qs.count()
+    returns_qs = Return.objects.all()
+    open_returns = returns_qs.filter(status='open').count()
+    total_returns = returns_qs.count()
+    credits_qs = Credit.objects.all()
+    open_credits = credits_qs.filter(status='open').count()
+    total_credits = credits_qs.count()
+    scraps_qs = Scrap.objects.all()
+    open_scraps = scraps_qs.filter(status='open').count()
+    total_scraps = scraps_qs.count()
     
     context = {
         'title': 'Dashboard',
@@ -116,7 +121,7 @@ def case_delete(request, case_id):
 
 def case_new(request):
     if request.method == 'POST':
-        form = CaseForm(request.POST)
+        form = CaseForm(request.POST, request.FILES)
         if form.is_valid():
             case = form.save()
             messages.success(request, 'Case created successfully!')
@@ -146,6 +151,23 @@ def customer_complaint_edit(request, case_id, complaint_id):
     complaint = case.complaints.get(id=complaint_id)
     if request.method == 'POST':
         form = CustomerComplaintForm(request.POST, instance=complaint)
+        # print forms values
+        print(form['status'].value())
+        # script to assign the timestamp of now for the status. Ex request submitted status then request submitted at timestamp of now. do it efficently like status = form.status and status_at = now
+        status_to_field = {
+            'request_submitted': 'request_submitted_at',
+            'path_assigned': 'path_assigned_at',
+            'investigation_in_progress': 'investigation_in_progress_at',
+            'resolution': 'resolution_at',
+            'closed': 'closed_at',
+        }
+        status = form['status'].value()
+        
+        if status in status_to_field:
+            setattr(complaint, status_to_field[status], timezone.now())
+            
+        complaint.status = status
+
         if form.is_valid():
             form.save()
             messages.success(request, 'Customer complaint updated successfully!')
@@ -153,7 +175,29 @@ def customer_complaint_edit(request, case_id, complaint_id):
     else:
         form = CustomerComplaintForm(instance=complaint)
         form.fields['case'].widget = forms.HiddenInput()
-    return render(request, 'process/customer_complaint_new.html', {'form': form, 'case': case, 'complaint': complaint})
+
+    
+    steps = [
+        {"label": "Open", "date": complaint.created_at.strftime('%Y-%m-%d %H:%M:%S') if complaint.created_at else ""},
+        {"label": "Request Submitted", "date": complaint.request_submitted_at.strftime('%Y-%m-%d %H:%M:%S') if complaint.request_submitted_at else ""},
+        {"label": "Path Assigned", "date": complaint.path_assigned_at.strftime('%Y-%m-%d %H:%M:%S') if complaint.path_assigned_at else ""},
+        {"label": "Investigation In Progress", "date": complaint.investigation_in_progress_at.strftime('%Y-%m-%d %H:%M:%S') if complaint.investigation_in_progress_at else ""},
+        {"label": "Resolution", "date": complaint.resolution_at.strftime('%Y-%m-%d %H:%M:%S') if complaint.resolution_at else ""},
+        {"label": "Closed", "date": complaint.closed_at.strftime('%Y-%m-%d %H:%M:%S') if complaint.closed_at else ""}
+    ]
+
+    current_step = complaint.get_status_display() if complaint.status else 'Open'
+
+    context = {
+        'form': form,
+        'case': case,
+        'complaint': complaint,
+        'steps': steps,
+        'current_step': current_step,
+        'wrapper_class': 'progress-bar-wrapper'
+    }
+
+    return render(request, 'process/customer_complaint_new.html', context)
 
 def customer_complaint_delete(request, case_id, complaint_id):
     case = Case.objects.get(id=case_id)
@@ -190,7 +234,27 @@ def return_edit(request, case_id, return_id):
     else:
         form = ReturnForm(instance=return_instance)
         form.fields['case'].widget = forms.HiddenInput()
-    return render(request, 'process/return_new.html', {'form': form, 'case': case, 'return_instance': return_instance})
+
+    steps = [
+        {"label": "Open", "date": return_instance.created_at.strftime('%Y-%m-%d %H:%M:%S')},
+        {"label": "Request Submitted", "date": "2025-05-02 10:30:00"},
+        {"label": "Path Assigned", "date": "2025-05-03 14:15:00"},
+        {"label": "Investigation In Progress", "date": "2025-05-05 11:45:00"},
+        {"label": "Resolution", "date": "2025-05-08 16:20:00"},
+        {"label": "Closed", "date": "2025-05-10 17:00:00"}
+    ]
+
+    current_step = return_instance.get_status_display() if return_instance.status else 'Open'
+
+    context = {
+        'form': form,
+        'case': case,
+        'return_instance': return_instance,
+        'steps': steps,
+        'current_step': current_step,
+        'wrapper_class': 'progress-bar-wrapper'
+    }
+    return render(request, 'process/return_new.html', context)
 
 def return_delete(request, case_id, return_id):
     case = Case.objects.get(id=case_id)

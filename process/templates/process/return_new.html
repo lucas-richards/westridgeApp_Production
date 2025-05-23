@@ -1,9 +1,11 @@
 {% extends "process/tabs_nav.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
+{% include "process/components/progress_bar.html" %}
 
 <!-- case detail -->
 <div class="container mt-3">
+    <div class="progress-bar-wrapper"></div>
     <div class="row">
         <div class="col-md-12">
             {% if return_instance %}

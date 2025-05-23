@@ -25,7 +25,11 @@
                 <p>Open Cases: {{ cases_count }}</p>
             </div>
             <div>
-                <a href="{% url 'process-case-new' %}" class="btn btn-primary">Open Case</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'process-case-new' %}" class="btn btn-primary">Open Case</a>
+                {% else %}
+                    <a href="{% url 'login' %}?next={% url 'process-case-new' %}" class="btn btn-primary">Login to Create Case</a>
+                {% endif %}
             </div>
         </div>
     </div>

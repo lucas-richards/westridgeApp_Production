@@ -7,9 +7,35 @@
     <div class="row">
         <div class="col-md-8 offset-md-2">
             <h2>New Customer Case</h2>
-            <form method="post">
+            <form method="post" enctype="multipart/form-data">
+                
                 {% csrf_token %}
-                {{ form|crispy }}
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.customer_number|as_crispy_field }}
+                        {{ form.customer_name|as_crispy_field }}
+                        {{ form.title|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                Case Options
+                            </div>
+                            <div class="card-body">
+                                {{ form.is_complaint|as_crispy_field }}
+                                {{ form.is_return|as_crispy_field }}
+                                {{ form.is_credit|as_crispy_field }}
+                                {{ form.is_scrap|as_crispy_field }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2 mb-3">
+                    {{ form.image1|as_crispy_field }}
+                    {{ form.image2|as_crispy_field }}
+                    {{ form.image3|as_crispy_field }}
+                </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
         </div>

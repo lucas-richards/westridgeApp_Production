@@ -6,7 +6,12 @@ class CaseForm(forms.ModelForm):
 
     class Meta:
         model = Case
-        fields = ['customer_number','customer_name','title',  'is_complaint', 'is_return', 'is_credit', 'is_scrap']
+        fields = ['customer_number','customer_name','title',  'is_complaint', 'is_return', 'is_credit', 'is_scrap', 'image1', 'image2', 'image3']
+        widgets = {
+            'customer_number': forms.TextInput(attrs={'placeholder': 'Enter customer number'}),
+            'customer_name': forms.TextInput(attrs={'placeholder': 'Enter customer name'}),
+            'title': forms.TextInput(attrs={'placeholder': 'Enter case title'}),
+        }
         widgets = {
             'status': forms.Select(),
         }
@@ -20,7 +25,7 @@ class CaseForm(forms.ModelForm):
 class CustomerComplaintForm(forms.ModelForm):
     class Meta:
         model = CustomerComplaint
-        fields = ['case','number','status', 'issue', 'resolution']
+        fields = ['case','number', 'status','issue', 'resolution']
         widgets = {
             'number': forms.TextInput(attrs={'placeholder': 'This number is provided by quality once it is submitted'}),
             'issue': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
