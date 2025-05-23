@@ -151,9 +151,6 @@ def customer_complaint_edit(request, case_id, complaint_id):
     complaint = case.complaints.get(id=complaint_id)
     if request.method == 'POST':
         form = CustomerComplaintForm(request.POST, instance=complaint)
-        # print forms values
-        print(form['status'].value())
-        # script to assign the timestamp of now for the status. Ex request submitted status then request submitted at timestamp of now. do it efficently like status = form.status and status_at = now
         status_to_field = {
             'request_submitted': 'request_submitted_at',
             'path_assigned': 'path_assigned_at',
@@ -162,16 +159,38 @@ def customer_complaint_edit(request, case_id, complaint_id):
             'closed': 'closed_at',
         }
         status = form['status'].value()
+
         
-        if status in status_to_field:
-            setattr(complaint, status_to_field[status], timezone.now())
-            
+
         complaint.status = status
 
         if form.is_valid():
+            if 'save_and_next' in request.POST:
+                current_status = form.cleaned_data['status']
+                
+                # Define status progression
+                status_flow = [
+                    'open',
+                    'request_submitted',
+                    'path_assigned',
+                    'investigation_in_progress',
+                    'resolution',
+                    'closed'
+                ]
+
+                try:
+                    next_index = status_flow.index(current_status) + 1
+                    if next_index < len(status_flow):
+                        form.instance.status = status_flow[next_index]
+                        if status_flow[next_index] in status_to_field:
+                            setattr(complaint, status_to_field[status_flow[next_index]], timezone.now())
+                except ValueError:
+                    pass  # Handle unexpected status gracefully
+
             form.save()
             messages.success(request, 'Customer complaint updated successfully!')
-            return redirect('process-case-detail', case_id=case.id)
+        return redirect('process-case-detail', case_id=case.id)
+            
     else:
         form = CustomerComplaintForm(instance=complaint)
         form.fields['case'].widget = forms.HiddenInput()
