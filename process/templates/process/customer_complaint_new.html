@@ -26,7 +26,15 @@
                         
                         <button type="submit" class="btn btn-success" name="save_and_next" value="1">
                             {% if complaint and complaint.status == 'resolution' %}
-                                Close
+                                Save &amp; Close Complaint
+                            {% elif complaint.status == 'open' %}
+                                Submit Request
+                            {% elif complaint.status == 'request_submitted' %}
+                                Number and Path Assigned
+                            {% elif complaint.status == 'path_assigned' %}
+                                Save &amp; Start Investigation
+                            {% elif complaint.status == 'investigation_in_progress' %}
+                                Save &amp; Finish Investigation
                             {% else %}
                                 Save &amp; Next Step
                             {% endif %}

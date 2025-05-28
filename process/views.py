@@ -11,6 +11,7 @@ from django.shortcuts import redirect
 from django import forms
 from django.urls import reverse
 from django.utils import timezone
+from pytz import timezone as pytz_timezone
 
 # Create your views here.
 def dashboard(request):
@@ -196,13 +197,22 @@ def customer_complaint_edit(request, case_id, complaint_id):
         form.fields['case'].widget = forms.HiddenInput()
 
     
+    pacific = pytz_timezone('US/Pacific')
+
+    def to_pacific(dt):
+        if dt:
+            if timezone.is_naive(dt):
+                dt = timezone.make_aware(dt)
+            return dt.astimezone(pacific).strftime('%Y-%m-%d %H:%M:%S')
+        return ""
+
     steps = [
-        {"label": "Open", "date": complaint.created_at.strftime('%Y-%m-%d %H:%M:%S') if complaint.created_at else ""},
-        {"label": "Request Submitted", "date": complaint.request_submitted_at.strftime('%Y-%m-%d %H:%M:%S') if complaint.request_submitted_at else ""},
-        {"label": "Path Assigned", "date": complaint.path_assigned_at.strftime('%Y-%m-%d %H:%M:%S') if complaint.path_assigned_at else ""},
-        {"label": "Investigation In Progress", "date": complaint.investigation_in_progress_at.strftime('%Y-%m-%d %H:%M:%S') if complaint.investigation_in_progress_at else ""},
-        {"label": "Resolution", "date": complaint.resolution_at.strftime('%Y-%m-%d %H:%M:%S') if complaint.resolution_at else ""},
-        {"label": "Closed", "date": complaint.closed_at.strftime('%Y-%m-%d %H:%M:%S') if complaint.closed_at else ""}
+        {"label": "Open", "date": to_pacific(complaint.created_at)},
+        {"label": "Request Submitted", "date": to_pacific(complaint.request_submitted_at)},
+        {"label": "Path Assigned", "date": to_pacific(complaint.path_assigned_at)},
+        {"label": "Investigation In Progress", "date": to_pacific(complaint.investigation_in_progress_at)},
+        {"label": "Resolution", "date": to_pacific(complaint.resolution_at)},
+        {"label": "Closed", "date": to_pacific(complaint.closed_at)}
     ]
 
     current_step = complaint.get_status_display() if complaint.status else 'Open'
