@@ -1,0 +1,28 @@
+{% extends "process/tabs_nav.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<!-- case detail -->
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                {% if item %}
+                <a href="{% url 'process-item-delete' case.id item.id %}" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this item entry?');">Delete</a>
+                {% endif %}
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% endblock content %}
+

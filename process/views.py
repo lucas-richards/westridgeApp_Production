@@ -4,7 +4,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.safestring import mark_safe
-from .forms import CaseForm, CustomerComplaintForm, ReturnForm, CreditForm, ScrapForm
+from .forms import CaseForm, CustomerComplaintForm, ReturnForm, CreditForm, ScrapForm, FileForm, ItemForm
 from django.http import HttpResponse
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -81,9 +81,29 @@ def cases(request):
 
 def case_detail(request, case_id):
     case = Case.objects.get(id=case_id)
+    if request.method == 'POST':
+        fileform = FileForm(request.POST, request.FILES)
+        if fileform.is_valid():
+            file_instance = fileform.save(commit=False)
+            file_instance.case = case
+            file_instance.save()
+            messages.success(request, 'File uploaded successfully!')
+            return redirect('process-case-detail', case_id=case.id)
+        else:
+            messages.error(request, 'Error uploading file. Please check the form.')
+    else:
+        fileform = FileForm()
+
+    files = case.files.exclude(file__iregex=r'\.(jpg|jpeg|png|gif|bmp|webp)$')
+    images = case.files.filter(file__iregex=r'\.(jpg|jpeg|png|gif|bmp|webp)$')
+    print(images)
+
     context = {
         'title': 'Case Detail',
         'case': case,
+        'fileform': fileform,
+        'files': files,
+        'images': images,
         'complaints': case.complaints.all(),
         'returns': case.returns.all(),
         'credits': case.credits.all(),
@@ -123,6 +143,7 @@ def case_delete(request, case_id):
 def case_new(request):
     if request.method == 'POST':
         form = CaseForm(request.POST, request.FILES)
+        
         if form.is_valid():
             case = form.save()
             messages.success(request, 'Case created successfully!')
@@ -371,4 +392,41 @@ def scrap_delete(request, case_id, scrap_id):
     scrap = case.scraps.get(id=scrap_id)
     scrap.delete()
     messages.success(request, 'Scrap deleted successfully!')
+    return redirect('process-case-detail', case_id=case.id)
+
+def item_new(request, case_id):
+    case = Case.objects.get(id=case_id)
+    if request.method == 'POST':
+        form = ItemForm(request.POST)
+        if form.is_valid():
+            item = form.save(commit=False)
+            item.cases = case
+            item.save()
+            messages.success(request, 'Item created successfully!')
+            return redirect('process-case-detail', case_id=case.id)
+    else:
+        form = ItemForm()
+        form.fields['cases'].initial = case.id
+        form.fields['cases'].widget = forms.HiddenInput()
+    return render(request, 'process/item_new.html', {'form': form, 'case': case})
+
+def item_edit(request, case_id, item_id):
+    case = Case.objects.get(id=case_id)
+    item = case.items.get(id=item_id)
+    if request.method == 'POST':
+        form = ItemForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Item updated successfully!')
+            return redirect('process-case-detail', case_id=case.id)
+    else:
+        form = ItemForm(instance=item)
+        form.fields['cases'].widget = forms.HiddenInput()
+    return render(request, 'process/item_new.html', {'form': form, 'case': case, 'item': item})
+
+def item_delete(request, case_id, item_id):
+    case = Case.objects.get(id=case_id)
+    item = case.items.get(id=item_id)
+    item.delete()
+    messages.success(request, 'Item deleted successfully!')
     return redirect('process-case-detail', case_id=case.id)

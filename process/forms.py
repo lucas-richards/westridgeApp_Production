@@ -1,5 +1,5 @@
 from django import forms
-from .models import Case, CustomerComplaint, Return, Credit, Category, Scrap
+from .models import Case, CustomerComplaint, Return, Credit, Category, Scrap, File, Item
 from .models import Category
 from django.contrib.auth.models import User
 
@@ -7,7 +7,7 @@ class CaseForm(forms.ModelForm):
 
     class Meta:
         model = Case
-        fields = ['customer_number','customer_name','title',  'is_complaint', 'is_return', 'is_credit', 'is_scrap', 'image1', 'image2', 'image3']
+        fields = ['customer_number','customer_name','title',  'is_complaint', 'is_return', 'is_credit', 'is_scrap']
         widgets = {
             'customer_number': forms.TextInput(attrs={'placeholder': 'Enter customer number'}),
             'customer_name': forms.TextInput(attrs={'placeholder': 'Enter customer name'}),
@@ -22,6 +22,19 @@ class CaseForm(forms.ModelForm):
             'is_credit': 'Credit',
             'is_scrap': 'Scrap',
         }
+
+class FileForm(forms.ModelForm):
+    class Meta:
+        model = File
+        fields = ['file']
+        labels = {
+            'file': 'Upload Files',
+        }
+
+class ItemForm(forms.ModelForm):
+    class Meta:
+        model = Item
+        fields = ['cases','sku', 'description','qty', 'lot']
 
 class CustomerComplaintForm(forms.ModelForm):
     class Meta:

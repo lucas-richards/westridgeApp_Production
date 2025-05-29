@@ -12,17 +12,18 @@ import io
 
 class Item(models.Model):
     sku = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
     qty = models.IntegerField(default=0)
     lot = models.CharField(max_length=100, blank=True, null=True)
+    cases = models.ForeignKey('Case', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
     complaint = models.ForeignKey('CustomerComplaint', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
-    return_case = models.ForeignKey('Return', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
-    credit_case = models.ForeignKey('Credit', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
-    scrap_case = models.ForeignKey('Scrap', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
+    returns = models.ForeignKey('Return', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
+    credit = models.ForeignKey('Credit', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
+    scrap = models.ForeignKey('Scrap', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return self.sku
 # Create your models here.
 class Case(models.Model):
     customer_number = models.CharField(max_length=100, blank=True)
@@ -39,10 +40,6 @@ class Case(models.Model):
     is_return = models.BooleanField(default=True)
     is_credit = models.BooleanField(default=True)
     is_scrap = models.BooleanField(default=True)
-    # add three files or images
-    image1 = models.ImageField(upload_to='cases/', blank=True, null=True)
-    image2 = models.ImageField(upload_to='cases/', blank=True, null=True)
-    image3 = models.ImageField(upload_to='cases/', blank=True, null=True)
 
 
     def __str__(self):
@@ -56,18 +53,6 @@ class Case(models.Model):
         # resize image to low quality
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-
-        for image_field in ['image1', 'image2', 'image3']:
-            image = getattr(self, image_field)
-            if image and hasattr(image, 'path'):
-                try:
-                    img = Image.open(image.path)
-                    if img.height > 300 or img.width > 300:
-                        output_size = (300, 300)
-                        img.thumbnail(output_size)
-                        img.save(image.path)
-                except Exception:
-                    pass
 
 class Category(models.Model):
     code = models.CharField(max_length=100)
@@ -191,3 +176,26 @@ class Scrap(models.Model):
     number = models.CharField(max_length=100, blank=True, null=True)
     reason = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+class File(models.Model):
+    case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='files')
+    file = models.FileField(upload_to='case_files/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploaded_files', blank=True, null=True)
+
+    def __str__(self):
+        return f"File for Case #{self.case.id} - {self.file.name}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        image = getattr(self, 'file')
+        if image and hasattr(image, 'path'):
+            try:
+                img = Image.open(image.path)
+                if img.format in ['JPEG', 'PNG', 'GIF', 'BMP']:
+                    if img.height > 500 or img.width > 500:
+                        output_size = (500, 500)
+                        img.thumbnail(output_size)
+                        img.save(image.path)
+            except Exception:
+                pass

@@ -95,8 +95,14 @@
                 
                 <div class="d-flex justify-content-between">
                     <div>
-                        <button type="submit" class="btn btn-primary" name="save">Save</button>
                         
+                        <!-- print form -->
+                         
+                        
+                        <button type="submit" class="btn btn-primary" name="save">Save</button>
+                        {% if complaint.status == 'closed' %}
+                         <button type="button" class="btn btn-secondary" onclick="window.print();">Print Complaint</button>
+                        {% else %}
                         <button type="submit" class="btn btn-success" name="save_and_next" value="1">
                             {% if complaint.status == 'open' %}
                                 Save &amp; Submit Complaint
@@ -112,8 +118,9 @@
                                 Save
                             {% endif %}
                         </button>
+                        {% endif %}
                     </div>
-                    {% if complaint %}
+                    {% if complaint and request.user.is_superuser %}
                         <a href="{% url 'process-complaint-delete' case.id complaint.id %}" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this complaint?');">Delete</a>
                     {% endif %}
                 </div>
@@ -205,6 +212,28 @@ document.addEventListener('DOMContentLoaded', function() {
             'enduser_phone',
             'enduser_address'
         ]);
+    } else if (statusValue === 'disposition') {
+        disableFields([
+            'reported_on',
+            'received_by',
+            'event_date',
+            'classification',
+            'issue',
+            'path',
+            'departments',
+            'number',
+            'enduser_name',
+            'enduser_email',
+            'enduser_phone',
+            'enduser_address',
+            'life_threatening',
+            'hospitalization',
+            'death',
+            'death_date',
+            'number',
+            'path',
+            'resolution',
+        ]);
     } else if (statusValue === 'resolution') {
         disableFields([
             'reported_on',
@@ -212,10 +241,43 @@ document.addEventListener('DOMContentLoaded', function() {
             'event_date',
             'classification',
             'issue',
+            'path',
+            'departments',
+            'number',
             'enduser_name',
             'enduser_email',
             'enduser_phone',
-            'enduser_address'
+            'enduser_address',
+            'life_threatening',
+            'hospitalization',
+            'death',
+            'death_date',
+            'number',
+            'path',
+            'disposition'
+        ]);
+    } else if (statusValue === 'closed') {
+        disableFields([
+            'reported_on',
+            'received_by',
+            'event_date',
+            'classification',
+            'issue',
+            'path',
+            'departments',
+            'number',
+            'enduser_name',
+            'enduser_email',
+            'enduser_phone',
+            'enduser_address',
+            'life_threatening',
+            'hospitalization',
+            'death',
+            'death_date',
+            'number',
+            'path',
+            'resolution',
+            'disposition' 
         ]);
     }
     

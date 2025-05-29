@@ -25,5 +25,9 @@ urlpatterns = [
     path('cases/<int:case_id>/scrap/new/', views.scrap_new, name='process-scrap-new'),
     path('cases/<int:case_id>/scrap/edit/<int:scrap_id>/', views.scrap_edit, name='process-scrap-edit'),
     path('cases/<int:case_id>/scrap/delete/<int:scrap_id>/', views.scrap_delete, name='process-scrap-delete'),
+    # item creation
+    path('cases/<int:case_id>/item/new/', views.item_new, name='process-item-new'),
+    path('cases/<int:case_id>/item/edit/<int:item_id>/', views.item_edit, name='process-item-edit'),
+    path('cases/<int:case_id>/item/delete/<int:item_id>/', views.item_delete, name='process-item-delete'),
 
 ]
