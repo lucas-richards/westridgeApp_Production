@@ -34,6 +34,7 @@ class UserUpdateForm(forms.ModelForm):
 class ProfileUpdateForm(forms.ModelForm):
     # birthday = forms.DateField(widget=forms.SelectDateWidget(years=range(1900,1999)))
     # only show those users that are supervisors
+    
     supervisor = forms.ModelChoiceField(queryset=User.objects.filter(profile__roles__name='SUP'), required=False)
     # roles as checkboxes
     roles = forms.ModelMultipleChoiceField(
@@ -44,7 +45,7 @@ class ProfileUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['active','supervisor','roles']
+        fields = ['active','department','supervisor','roles']
 
 #  roles form with modules as checkboxes
 class RoleForm(forms.ModelForm):

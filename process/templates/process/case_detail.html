@@ -107,6 +107,10 @@
                             </div>
                             <p class="card-text">Description: {{ complaint.description }}</p>
                             <p class="card-text">Created At: {{ complaint.created_at }}</p>
+                            <p class="card-text">Created By: {{ complaint.created_by }}</p>
+                            {% if complaint.path %}
+                                <p class="card-text">Path: {{ complaint.path }}</p>
+                            {% endif %}
                         </div>
                     </div>
                 </a>

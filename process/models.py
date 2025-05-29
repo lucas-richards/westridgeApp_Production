@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
+from users.models import Department
 from django.utils import timezone
 from django.core.files.storage import FileSystemStorage
 from django.core.files import File
@@ -8,7 +10,19 @@ from django.core.exceptions import ValidationError
 from PIL import Image
 import io
 
+class Item(models.Model):
+    sku = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, null=True)
+    qty = models.IntegerField(default=0)
+    lot = models.CharField(max_length=100, blank=True, null=True)
+    complaint = models.ForeignKey('CustomerComplaint', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
+    return_case = models.ForeignKey('Return', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
+    credit_case = models.ForeignKey('Credit', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
+    scrap_case = models.ForeignKey('Scrap', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.name
 # Create your models here.
 class Case(models.Model):
     customer_number = models.CharField(max_length=100, blank=True)
@@ -19,6 +33,7 @@ class Case(models.Model):
         ('closed', 'Closed'),
     ]
     status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='open')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_cases', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_complaint = models.BooleanField(default=True)
     is_return = models.BooleanField(default=True)
@@ -64,17 +79,21 @@ class Category(models.Model):
 
 class CustomerComplaint(models.Model):
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='complaints')
+    reported_on = models.DateField(default=timezone.now, blank=True, null=True)
+    received_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_complaints', blank=True, null=True)
+    event_date = models.DateField(blank=True, null=True)
+
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_complaints', blank=True, null=True)
     STATUS_COMPLAINT_CHOICES = [
         ('open', 'Open'),
         ('request_submitted', 'Request Submitted'),
         ('path_assigned', 'Path Assigned'),
         ('investigation_in_progress', 'Investigation In Progress'),
+        ('disposition', 'Disposition'),
         ('resolution', 'Resolution'),
         ('closed', 'Closed'),
     ]
     status = models.CharField(max_length=100, choices=STATUS_COMPLAINT_CHOICES, default='open')
-    sku = models.CharField(max_length=100, blank=True, null=True)
-    lot_number = models.CharField(max_length=100, blank=True, null=True)
     classification = models.CharField(max_length=100, choices=[
         ('shipping', 'Shipping'),
         ('contamination', 'Contamination'),
@@ -85,21 +104,41 @@ class CustomerComplaint(models.Model):
         ('expired', 'Expired'),
         ('cloudy', 'Cloudy'),
         ('other', 'Other'),
-    ], default='other')
+    ], default='other', blank=True, null=True)
     number = models.CharField(max_length=100, blank=True, null=True)
     # time stamp quality received
     request_submitted_at = models.DateTimeField(blank=True, null=True)
     path_assigned_at = models.DateTimeField(blank=True, null=True)
     investigation_in_progress_at = models.DateTimeField(blank=True, null=True)
+    disposition_at = models.DateTimeField(blank=True, null=True)
     resolution_at = models.DateTimeField(blank=True, null=True)
     closed_at = models.DateTimeField(blank=True, null=True)
-    
-    issue = models.TextField()
+    disposition = models.TextField(blank=True, null=True)
     resolution = models.TextField(blank=True, null=True)
+    departments = models.ManyToManyField(Department, related_name='complaints', blank=True)
     created_at = models.DateTimeField(default=timezone.now, editable=False)
+    enduser_name = models.CharField(max_length=200, blank=True, null=True)
+    enduser_email = models.EmailField(blank=True, null=True)
+    enduser_phone = models.CharField(max_length=20, blank=True, null=True)
+    enduser_address = models.CharField(max_length=255, blank=True, null=True)
+    death = models.BooleanField(default=False)
+    death_date = models.DateField(blank=True, null=True)
+    life_threatening = models.BooleanField(default=False)
+    hospitalization = models.BooleanField(default=False)
+    issue = models.TextField()
+    path = models.CharField(max_length=100, choices=[
+        ('path1', 'Path 1: 29, 33 – Customer Resolution (Customer Service or Sales); 24 – FDA Report Assessment (QA); 26, 27 – Trend Check (QA);25, 28, 30 to 32 – QA Investigation'),
+        ('path2', 'Path 2: 29, 33 – Customer Resolution (Customer Service or Sales); 26-27 – Trend Check (QA); 25, 28, 30 to 32 – QA Investigation.'),
+        ('path3', 'Path 3: 29, 33 – Customer Resolution (customer service or sales); 26, 27 – Trend Verification (QA); Notify Vendor (Purchasing)'),
+        ('path4', 'Path 4: 29, 33 – Customer Resolution (Customer Service or Sales); 26, 27 – Trend Verification (QA); 28 and 31, 32 – Incident Investigation (Customer Service or Sales/Shipping)'),
+        ('path5', 'Path 5: 29, 33 – Customer Resolution (Customer Service or Sales); 24 – FDA Report Evaluation (QA); 26, 27 – Trend Check (QA), Notify Vendor (QA or Purchases).'),
+    ], blank=True, null=True)
+    image = models.ImageField(upload_to='complaint/', blank=True, null=True)
+
 
 class Return(models.Model):
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='returns')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_returns', blank=True, null=True)
     STATUS_RETURN_CHOICES = [
         ('open', 'Open'),
         ('closed', 'Closed'),
@@ -130,6 +169,7 @@ class Return(models.Model):
 
 class Credit(models.Model):
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='credits')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_credits', blank=True, null=True)
     STATUS_CREDIT_CHOICES = [
         ('open', 'Open'),
         ('closed', 'Closed'),
@@ -142,6 +182,7 @@ class Credit(models.Model):
 
 class Scrap(models.Model):
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='scraps')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_scraps', blank=True, null=True)
     STATUS_SCRAP_CHOICES = [
         ('open', 'Open'),
         ('closed', 'Closed'),

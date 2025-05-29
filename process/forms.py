@@ -1,6 +1,7 @@
 from django import forms
 from .models import Case, CustomerComplaint, Return, Credit, Category, Scrap
 from .models import Category
+from django.contrib.auth.models import User
 
 class CaseForm(forms.ModelForm):
 
@@ -25,17 +26,37 @@ class CaseForm(forms.ModelForm):
 class CustomerComplaintForm(forms.ModelForm):
     class Meta:
         model = CustomerComplaint
-        fields = ['case','number', 'status','issue', 'resolution']
+        exclude = [
+            'created_at',
+            'created_by',
+            'open_at',
+            'closed_at',
+            'request_submitted_at',
+            'path_assigned_at',
+            'investigation_in_progress_at',
+            'disposition_at',
+            'resolution_at',
+        ]
         widgets = {
-            'number': forms.TextInput(attrs={'placeholder': 'This number is provided by quality once it is submitted'}),
             'issue': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
+            'disposition': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
             'resolution': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
+            'reported_on': forms.DateInput(attrs={'type': 'date'}),
+            'event_date': forms.DateInput(attrs={'type': 'date'}),
+            'death_date': forms.DateInput(attrs={'type': 'date'}),
         }
         labels = {
             'case': 'Related Case',
             'issue': 'Issue Description',
             'resolution': 'Resolution Description',
+            'departments': 'Departments to investigate (use Ctrl + Click to select multiple)',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['received_by'].queryset = User.objects.filter(profile__active=True).order_by('first_name', 'last_name')
+
+
 
 class ReturnForm(forms.ModelForm):
     class Meta:

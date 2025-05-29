@@ -1,15 +1,17 @@
 {% extends "process/tabs_nav.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
-<a href="{% url 'process-case-detail' case.id %}" class="ml-4 mb-4">
-            <svg fill="#000000" height="40px" width="40px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 26.676 26.676" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path d="M26.105,21.891c-0.229,0-0.439-0.131-0.529-0.346l0,0c-0.066-0.156-1.716-3.857-7.885-4.59 c-1.285-0.156-2.824-0.236-4.693-0.25v4.613c0,0.213-0.115,0.406-0.304,0.508c-0.188,0.098-0.413,0.084-0.588-0.033L0.254,13.815 C0.094,13.708,0,13.528,0,13.339c0-0.191,0.094-0.365,0.254-0.477l11.857-7.979c0.175-0.121,0.398-0.129,0.588-0.029 c0.19,0.102,0.303,0.295,0.303,0.502v4.293c2.578,0.336,13.674,2.33,13.674,11.674c0,0.271-0.191,0.508-0.459,0.562 C26.18,21.891,26.141,21.891,26.105,21.891z"></path> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </g> </g></svg>
-        </a>
-{% include "process/components/progress_bar.html" %}
+    <a href="{% url 'process-case-detail' case.id %}" class="ml-4 mb-4">
+        <svg fill="#000000" height="40px" width="40px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 26.676 26.676" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path d="M26.105,21.891c-0.229,0-0.439-0.131-0.529-0.346l0,0c-0.066-0.156-1.716-3.857-7.885-4.59 c-1.285-0.156-2.824-0.236-4.693-0.25v4.613c0,0.213-0.115,0.406-0.304,0.508c-0.188,0.098-0.413,0.084-0.588-0.033L0.254,13.815 C0.094,13.708,0,13.528,0,13.339c0-0.191,0.094-0.365,0.254-0.477l11.857-7.979c0.175-0.121,0.398-0.129,0.588-0.029 c0.19,0.102,0.303,0.295,0.303,0.502v4.293c2.578,0.336,13.674,2.33,13.674,11.674c0,0.271-0.191,0.508-0.459,0.562 C26.18,21.891,26.141,21.891,26.105,21.891z"></path> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </g> </g></svg>
+    </a>
+{% if complaint %}
+    {% include "process/components/progress_bar.html" %}
+{% endif %}
 
 
 <!-- case detail -->
  
-<div class="container mt-3">
+<div class="container mt-3 mb-3">
     <div class="row">
         <div class="col-md-12">
             {% if complaint %}
@@ -19,24 +21,95 @@
             {% endif %}
             <form method="post">
                 {% csrf_token %}
-                {{ form|crispy }}
+                    <div class="mb-3">
+                        {{ form.status|as_crispy_field }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3" hidden>
+                                {{ form.case|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.reported_on|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.received_by|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.event_date|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.classification|as_crispy_field }}
+                            </div>
+                            
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.enduser_name|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.enduser_email|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.enduser_phone|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.enduser_address|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            
+                            <h4>Outcome (Check any that apply)</h4>
+                            <div class="mb-3">
+                                {{ form.life_threatening|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.hospitalization|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.death|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.death_date|as_crispy_field }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ form.issue|as_crispy_field }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.number|as_crispy_field }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.path|as_crispy_field }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.departments|as_crispy_field }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.disposition|as_crispy_field }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.resolution|as_crispy_field }}
+                    </div>
+                
                 <div class="d-flex justify-content-between">
                     <div>
                         <button type="submit" class="btn btn-primary" name="save">Save</button>
                         
                         <button type="submit" class="btn btn-success" name="save_and_next" value="1">
-                            {% if complaint and complaint.status == 'resolution' %}
-                                Save &amp; Close Complaint
-                            {% elif complaint.status == 'open' %}
-                                Submit Request
+                            {% if complaint.status == 'open' %}
+                                Save &amp; Submit Complaint
                             {% elif complaint.status == 'request_submitted' %}
-                                Number and Path Assigned
+                                Save &amp; Give Back
                             {% elif complaint.status == 'path_assigned' %}
                                 Save &amp; Start Investigation
                             {% elif complaint.status == 'investigation_in_progress' %}
                                 Save &amp; Finish Investigation
+                            {% elif complaint and complaint.status == 'resolution' %}
+                                Save &amp; Close Complaint
                             {% else %}
-                                Save &amp; Next Step
+                                Save
                             {% endif %}
                         </button>
                     </div>
@@ -50,7 +123,104 @@
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the status field
+    var statusField = document.querySelector('[name="status"]');
+    if (!statusField) return;
 
+    // Get the value of the status field
+    var statusValue = statusField.value;
+
+    // If status is 'open', set the specified fields to readonly/disabled
+    var disableFields = function(fields) {
+        fields.forEach(function(fieldName) {
+            var field = document.querySelector('[name="' + fieldName + '"]');
+            if (field) {
+                if (field.type === 'checkbox' || field.tagName.toLowerCase() === 'select') {
+                    field.disabled = true;
+                } else {
+                    field.readOnly = true;
+                }
+            }
+        });
+    };
+
+    if (statusValue === 'open') {
+        disableFields([
+            'number',
+            'path',
+            'departments',
+            'disposition',
+            'resolution'
+        ]);
+    } else if (statusValue === 'request_submitted') {
+        disableFields([
+            'reported_on',
+            'received_by',
+            'event_date',
+            'classification',
+            'issue',
+            'enduser_name',
+            'enduser_email',
+            'enduser_phone',
+            'enduser_address',
+            'life_threatening',
+            'hospitalization',
+            'death',
+            'death_date',
+            'departments',
+            'disposition',
+            'resolution'
+        ]);
+    } else if (statusValue === 'path_assigned') {
+        disableFields([
+            'reported_on',
+            'received_by',
+            'event_date',
+            'classification',
+            'issue',
+            'enduser_name',
+            'enduser_email',
+            'enduser_phone',
+            'enduser_address',
+            'life_threatening',
+            'hospitalization',
+            'death',
+            'death_date',
+            'number',
+            'path',
+            'resolution',
+            'disposition'    
+        ]);
+    } else if (statusValue === 'investigation_in_progress') {
+        disableFields([
+            'reported_on',
+            'received_by',
+            'event_date',
+            'classification',
+            'issue',
+            'enduser_name',
+            'enduser_email',
+            'enduser_phone',
+            'enduser_address'
+        ]);
+    } else if (statusValue === 'resolution') {
+        disableFields([
+            'reported_on',
+            'received_by',
+            'event_date',
+            'classification',
+            'issue',
+            'enduser_name',
+            'enduser_email',
+            'enduser_phone',
+            'enduser_address'
+        ]);
+    }
+    
+});
+</script>
 
 
 

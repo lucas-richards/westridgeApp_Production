@@ -135,8 +135,10 @@ def customer_complaint_new(request, case_id):
     case = Case.objects.get(id=case_id)
     if request.method == 'POST':
         form = CustomerComplaintForm(request.POST)
+        print(form.errors)
         if form.is_valid():
             customer_complaint = form.save(commit=False)
+            customer_complaint.created_by = request.user
             customer_complaint.case = case
             customer_complaint.save()
             messages.success(request, 'Customer complaint created successfully!')
@@ -156,6 +158,7 @@ def customer_complaint_edit(request, case_id, complaint_id):
             'request_submitted': 'request_submitted_at',
             'path_assigned': 'path_assigned_at',
             'investigation_in_progress': 'investigation_in_progress_at',
+            'disposition': 'disposition_at',
             'resolution': 'resolution_at',
             'closed': 'closed_at',
         }
@@ -164,7 +167,7 @@ def customer_complaint_edit(request, case_id, complaint_id):
         
 
         complaint.status = status
-
+        print(form.errors)
         if form.is_valid():
             if 'save_and_next' in request.POST:
                 current_status = form.cleaned_data['status']
@@ -175,6 +178,7 @@ def customer_complaint_edit(request, case_id, complaint_id):
                     'request_submitted',
                     'path_assigned',
                     'investigation_in_progress',
+                    'disposition',
                     'resolution',
                     'closed'
                 ]
@@ -190,6 +194,8 @@ def customer_complaint_edit(request, case_id, complaint_id):
 
             form.save()
             messages.success(request, 'Customer complaint updated successfully!')
+        else:
+            messages.error(request, f'Error updating customer complaint. Please check the form.{form.errors}')
         return redirect('process-case-detail', case_id=case.id)
             
     else:
@@ -211,6 +217,7 @@ def customer_complaint_edit(request, case_id, complaint_id):
         {"label": "Request Submitted", "date": to_pacific(complaint.request_submitted_at)},
         {"label": "Path Assigned", "date": to_pacific(complaint.path_assigned_at)},
         {"label": "Investigation In Progress", "date": to_pacific(complaint.investigation_in_progress_at)},
+        {"label": "Disposition", "date": to_pacific(complaint.disposition_at)},
         {"label": "Resolution", "date": to_pacific(complaint.resolution_at)},
         {"label": "Closed", "date": to_pacific(complaint.closed_at)}
     ]
