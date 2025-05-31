@@ -12,6 +12,8 @@
     </div>
     <div class="row">
         <div class="col-md-4">
+            <h6>Created By: {{ case.created_by }}</h6>
+            <h5>Title: {{ case.title }}</h5>
             <!-- add a badge to show the status -->
             {% if case.status == "closed" %}
                 <span class="mb-4 badge" style="border: 1px solid #6c757d; background-color: #f2f2f2; color: #6c757d;">
@@ -101,7 +103,7 @@
         </div>
     </div>
     <hr>
-    <h5>Items Involved
+    <h5>Received Items
         <a href="{% url 'process-item-new' case.id %}" >
                 <span class="mr-1">+</span>
             </a>

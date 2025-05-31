@@ -145,7 +145,9 @@ def case_new(request):
         form = CaseForm(request.POST, request.FILES)
         
         if form.is_valid():
-            case = form.save()
+            case = form.save(commit=False)
+            case.created_by = request.user
+            case.save()
             messages.success(request, 'Case created successfully!')
             return redirect('process-case-detail', case_id=case.id)
     else:

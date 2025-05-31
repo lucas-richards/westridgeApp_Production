@@ -1025,6 +1025,12 @@ def kpis(request):
         key=lambda x: float(x.get('BackOrdered', 0)), 
         reverse=True
     )[:10]
+    # sort by the worth of the bo and get the first 10 results
+    # top_ten_by_worth = sorted(
+    #     results,
+    #     key=lambda x: float(x.get('worth', 0)),
+    #     reverse=True
+    # )
     print('top_five_backordered:', top_five_backordered)
     print('total_items:', total_items)
     print('source_purchasing_count:', source_purchasing_count)
