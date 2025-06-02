@@ -1020,17 +1020,18 @@ def kpis(request):
     days_without_incidents = (today - start_date).days
 
     # Sort by 'Back Ordered (POs-available)' in descending order and get the top 5
+    # top_five_backordered = sorted(
+    #     results, 
+    #     key=lambda x: float(x.get('BackOrdered', 0)), 
+    #     reverse=True
+    # )[:10]
+    # sort by the worth of the bo and get the first 10 results
     top_five_backordered = sorted(
-        results, 
-        key=lambda x: float(x.get('BackOrdered', 0)), 
+        results,
+        key=lambda x: float(x.get('Worth', 0)),
         reverse=True
     )[:10]
-    # sort by the worth of the bo and get the first 10 results
-    # top_ten_by_worth = sorted(
-    #     results,
-    #     key=lambda x: float(x.get('worth', 0)),
-    #     reverse=True
-    # )
+    
     print('top_five_backordered:', top_five_backordered)
     print('total_items:', total_items)
     print('source_purchasing_count:', source_purchasing_count)
@@ -1086,7 +1087,12 @@ def kpi_data_json(request):
     start_date = date(2025, 5, 2)
     days_without_incidents = (date.today() - start_date).days
 
-    top_five_backordered = sorted(results, key=lambda x: float(x.get('BackOrdered', 0)), reverse=True)[:10]
+    # top_five_backordered = sorted(results, key=lambda x: float(x.get('BackOrdered', 0)), reverse=True)[:10]
+    top_five_backordered = sorted(
+        results,
+        key=lambda x: float(x.get('Worth', 0)),
+        reverse=True
+    )[:10]
     print('json data', total_items)
 
     return JsonResponse({

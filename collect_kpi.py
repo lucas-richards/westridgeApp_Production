@@ -146,6 +146,7 @@ class Command(BaseCommand):
 
         # back order kpi
         results = self.getAcumatica_data(top=0,debug=True)
+        print('Total items fetched from Acumatica:', len(results))
         # Filter results where 'Back Ordered (POs-available)' is greater than zero
         results = [item for item in results if float(item.get('BackOrdered', 0)) > 0]
         # Round the 'BackOrderedPOsavailable' value for all items without decimals
