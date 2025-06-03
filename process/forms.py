@@ -34,7 +34,23 @@ class FileForm(forms.ModelForm):
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
-        fields = ['cases','sku', 'description','qty', 'lot']
+        fields = ['cases','received_at','sku', 'description','qty', 'lot', 'wli_item', 'inspected', 'inspection_notes','inspection_initials','inspection_date']
+        widgets = {
+            'received_at': forms.DateInput(attrs={'type': 'date'}),
+            'sku': forms.TextInput(attrs={'placeholder': 'Enter SKU'}),
+            'description': forms.TextInput(attrs={'placeholder': 'Enter item description'}),
+            'qty': forms.NumberInput(attrs={'placeholder': 'Enter quantity'}),
+            'lot': forms.TextInput(attrs={'placeholder': 'Enter lot number'}),
+            'wli_item': forms.CheckboxInput(attrs={'placeholder': 'Is this a WLI item?'}),
+            'inspected': forms.CheckboxInput(),
+            'inspection_notes': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
+            'inspection_initials': forms.TextInput(attrs={'placeholder': 'Enter initials'}),
+            'inspection_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+        labels = {
+            'wli_item': 'Check if this a WLI item. (If checked, the item has to be inspected by quality)',
+            'inspected': 'Check if inspected',
+        }
 
 class CustomerComplaintForm(forms.ModelForm):
     class Meta:

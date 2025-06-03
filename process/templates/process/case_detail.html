@@ -87,12 +87,12 @@
             {% endif %}
             {% if case.is_return %}
             <a href="{% url 'process-return-new' case.id %}" class="btn btn-sm btn-primary mb-2 text-center" style="min-width: 200px;">
-                <span class="mr-1">+</span> Return
+                <span class="mr-1">+</span> Return For Credit
             </a>
             {% endif %}
             {% if case.is_credit %}
             <a href="{% url 'process-credit-new' case.id %}" class="btn btn-sm btn-primary mb-2 text-center" style="min-width: 200px;">
-                <span class="mr-1">+</span> Credit
+                <span class="mr-1">+</span> Credit Memo
             </a>
             {% endif %}
             {% if case.is_scrap %}
@@ -109,17 +109,46 @@
             </a>
     </h5>
     
-    <div class="row">
-        <ul>
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Description</th>
+                <th>Inspected</th>
+                <th>WLI Product?</th>
+                <th>Insp. Notes</th>
+                <th>Insp. Initials</th>
+            </tr>
+        </thead>
+        <tbody>
             {% for item in case.items.all %}
-            <li>
-                <a href="{% url 'process-item-edit' case.id item.id %}" class="text-dark text-decoration-none">
-                     {{ item.sku }} - {{ item.description }}
-                </a>
-            </li>
-            {% endfor %}    
-        </ul>
-    </div>
+            <tr>
+                <td>
+                    <a href="{% url 'process-item-edit' case.id item.id %}" class="text-decoration-none">
+                        {{ item.sku }}
+                    </a>
+                </td>
+                <td>{{ item.description }}</td>
+                <td>
+                    {% if item.inspected %}
+                        Yes
+                    {% else %}
+                        No
+                    {% endif %}
+                </td>
+                <td>
+                    {% if item.is_wli_product %}
+                        Yes
+                    {% else %}
+                        No
+                    {% endif %}
+                </td>
+                <td>{{ item.inspection_notes }}</td>
+                <td>{{ item.inspection_initials }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     <hr>
     <div class="row">
         <!-- Customer Complaints Column -->
@@ -157,7 +186,7 @@
         <!-- Returns Column -->
          {% if case.is_return %}
         <div class="col-md-3">
-            <h3>Returns</h3>
+            <h3>Return For Credit</h3>
             {% if returns %}
                 {% for return_item in returns %}
                 <a class="text-dark text-decoration-none" href="{% url 'process-return-edit' case.id return_item.id %}">
@@ -184,7 +213,7 @@
         <!-- Credits Column -->
          {% if case.is_credit %}
         <div class="col-md-3">
-            <h3>Credits</h3>
+            <h3>Credit Memo</h3>
             {% if credits %}
                 {% for credit in credits %}
                 <a class="text-dark text-decoration-none" href="{% url 'process-credit-edit' case.id credit.id %}">

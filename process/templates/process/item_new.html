@@ -11,7 +11,7 @@
             {{ form|crispy }}
             <div class="d-flex justify-content-between">
                 <button type="submit" class="btn btn-primary">Submit</button>
-                {% if item %}
+                {% if item and request.user.is_superuser %}
                 <a href="{% url 'process-item-delete' case.id item.id %}" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this item entry?');">Delete</a>
                 {% endif %}
             </div>

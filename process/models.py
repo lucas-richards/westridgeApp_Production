@@ -11,16 +11,22 @@ from PIL import Image
 import io
 
 class Item(models.Model):
-    sku = models.CharField(max_length=100, unique=True)
+    sku = models.CharField(max_length=100)
     description = models.CharField(max_length=255, blank=True, null=True)
     qty = models.IntegerField(default=0)
     lot = models.CharField(max_length=100, blank=True, null=True)
+    wli_item = models.BooleanField(default=False)
+    inspected = models.BooleanField(default=False)
+    inspection_notes = models.TextField(blank=True, null=True)
+    inspection_date = models.DateTimeField(blank=True, null=True)
+    inspection_initials = models.CharField(max_length=10, blank=True, null=True)
+    received_at = models.DateField(blank=True, null=True)
     cases = models.ForeignKey('Case', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
     complaint = models.ForeignKey('CustomerComplaint', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
     returns = models.ForeignKey('Return', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
     credit = models.ForeignKey('Credit', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
     scrap = models.ForeignKey('Scrap', on_delete=models.CASCADE, related_name='items', blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return self.sku
